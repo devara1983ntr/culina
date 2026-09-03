@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline · CULINA</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: #faf7f2;
+        color: #221b14;
+        padding: 2rem;
+        text-align: center;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: #14100c; color: #f2eae0; }
+      }
+      .mark {
+        width: 56px; height: 56px; margin: 0 auto 1.5rem;
+        color: #b8431a;
+      }
+      h1 { font-size: 1.6rem; margin: 0 0 0.75rem; font-weight: 600; letter-spacing: -0.01em; }
+      p { max-width: 42ch; line-height: 1.6; opacity: 0.75; margin: 0 auto 1.75rem; font-size: 0.95rem; }
+      a {
+        display: inline-block;
+        background: #b8431a; color: #fff8f2;
+        padding: 0.7rem 1.6rem; border-radius: 10px;
+        text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      }
+      code { font-size: 0.85em; opacity: 0.8; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M22.9 6.2 A12 12 0 1 0 22.9 25.8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        <circle cx="28" cy="16" r="2.4" fill="currentColor" />
+      </svg>
+      <h1>You’re offline</h1>
+      <p>
+        CULINA needs a connection for live recipes, drinks and product data. Pages you’ve already
+        visited remain available from cache — reconnect to keep discovering.
+      </p>
+      <a href="/">Try again</a>
+    </main>
+  </body>
+</html>

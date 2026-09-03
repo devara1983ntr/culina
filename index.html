@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>CULINA — Discover food. Understand it. Make it yours.</title>
+    <meta
+      name="description"
+      content="CULINA unifies recipes, ingredients, nutrition, food products, cocktails, beer, breweries and coffee from multiple verified data sources into one elegant discovery experience."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf7f2" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#14100c" />
+    <meta name="application-name" content="CULINA" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CULINA" />
+    <meta property="og:title" content="CULINA — The Interactive Food Intelligence &amp; Discovery Platform" />
+    <meta
+      property="og:description"
+      content="Recipes, ingredients, nutrition and drinks — intelligently connected. One search across verified food data sources."
+    />
+    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="CULINA — Food Intelligence &amp; Discovery" />
+    <meta
+      name="twitter:description"
+      content="Recipes, ingredients, nutrition and drinks — intelligently connected."
+    />
+
+    <link rel="canonical" href="/" id="canonical" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Theme bootstrap: runs before first paint to avoid a flash of the wrong theme -->
+    <script>
+      (function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem('culina:v1:settings') || '{}');
+          var theme =
+            stored.theme === 'light' || stored.theme === 'dark'
+              ? stored.theme
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+
+    <script type="module" src="/js/main.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header id="site-header" class="site-header"></header>
+    <main id="main" class="site-main" tabindex="-1"></main>
+    <footer id="site-footer" class="site-footer"></footer>
+    <div id="bottom-nav" class="bottom-nav-root"></div>
+
+    <!-- Boot splash: pre-JS brand moment; removed by main.js once the app mounts.
+         Hidden entirely when JavaScript is unavailable (noscript below shows instead). -->
+    <div id="boot-splash" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none" width="56" height="56" focusable="false">
+        <path d="M22.9 6.2 A12 12 0 1 0 22.9 25.8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        <circle cx="28" cy="16" r="2.4" fill="currentColor" />
+      </svg>
+      <span class="boot-word">CULINA</span>
+    </div>
+
+    <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+    <div id="dialog-root"></div>
+
+    <noscript>
+      <div style="max-width: 42rem; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1 style="font-size: 1.5rem">CULINA needs JavaScript</h1>
+        <p>
+          CULINA is an interactive application that runs entirely in your browser and fetches live data from
+          its data providers. Please enable JavaScript to use it.
+        </p>
+        <p>
+          You can also browse the data sources directly:
+          <a href="https://www.themealdb.com">TheMealDB</a>,
+          <a href="https://www.thecocktaildb.com">TheCocktailDB</a>,
+          <a href="https://www.openbrewerydb.org">Open Brewery DB</a>,
+          <a href="https://world.openfoodfacts.org">Open Food Facts</a>.
+        </p>
+      </div>
+    </noscript>
+  </body>
+</html>

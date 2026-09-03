@@ -1,0 +1,217 @@
+/* ==========================================================================
+   CULINA — Design tokens
+   Generated from the UI/UX Pro Max skill design system (design-system/culina/MASTER.md)
+   with a warm editorial palette adaptation — see docs/DESIGN-DECISIONS.md.
+
+   Architecture: primitive scale → semantic tokens → components.
+   Semantic color names follow the skill's token architecture
+   (--color-primary / on-primary / background / card / muted / border / ring).
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------
+     Typography
+     Libre Bodoni (editorial display serif) + Public Sans (UI/body sans).
+     Self-hosted via @fontsource — properly licensed (OFL).
+     --------------------------------------------------------------------- */
+  --font-display: 'Libre Bodoni', 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.45rem);
+  --text-2xl: clamp(1.5rem, 1.25rem + 1vw, 1.9rem);
+  --text-3xl: clamp(1.85rem, 1.45rem + 1.8vw, 2.6rem);
+  --text-4xl: clamp(2.3rem, 1.7rem + 2.8vw, 3.5rem);
+  --text-hero: clamp(2.7rem, 1.4rem + 5.2vw, 4.9rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  --tracking-overline: 0.14em;
+  --tracking-wide: 0.06em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---------------------------------------------------------------------
+     Spacing — 4px rhythm (skill: consistent 4/8 spacing system)
+     --------------------------------------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-section: clamp(3rem, 7vw, 5.5rem);
+
+  /* ---------------------------------------------------------------------
+     Radius — restrained (PRD: avoid excessive rounding)
+     --------------------------------------------------------------------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
+  --radius-full: 999px;
+  --radius-card: 14px;
+
+  /* ---------------------------------------------------------------------
+     Elevation — subtle, warm-tinted (skill: flat design, no heavy shadows)
+     --------------------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(46, 26, 12, 0.06), 0 1px 3px rgba(46, 26, 12, 0.05);
+  --shadow-md: 0 2px 6px rgba(46, 26, 12, 0.07), 0 4px 14px rgba(46, 26, 12, 0.06);
+  --shadow-lg: 0 6px 18px rgba(46, 26, 12, 0.09), 0 14px 40px rgba(46, 26, 12, 0.1);
+  --shadow-card-hover: 0 4px 10px rgba(46, 26, 12, 0.08), 0 12px 32px rgba(46, 26, 12, 0.1);
+
+  /* ---------------------------------------------------------------------
+     Motion (PRD §8: fast / standard / emphasized)
+     --------------------------------------------------------------------- */
+  --dur-fast: 150ms;
+  --dur-std: 250ms;
+  --dur-emph: 450ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ---------------------------------------------------------------------
+     Layout
+     --------------------------------------------------------------------- */
+  --container: 1280px;
+  --container-wide: 1440px;
+  --container-narrow: 780px;
+  --container-reading: 680px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --header-height: 66px;
+
+  /* ---------------------------------------------------------------------
+     Z-index scale
+     --------------------------------------------------------------------- */
+  --z-header: 40;
+  --z-drawer: 60;
+  --z-overlay: 70;
+  --z-modal: 80;
+  --z-toast: 90;
+
+  /* ---------------------------------------------------------------------
+     Component metrics
+     --------------------------------------------------------------------- */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --control-h: 44px; /* touch target ≥ 44px (skill pre-delivery checklist) */
+  --control-h-sm: 36px;
+}
+
+/* ==========================================================================
+   Semantic color tokens — LIGHT (warm paper / editorial)
+   ========================================================================== */
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --color-background: #faf7f2;
+  --color-background-subtle: #f3ede2;
+  --color-surface: #ffffff;
+  --color-surface-2: #f7f1e8;
+  --color-surface-elevated: #ffffff;
+
+  --color-text: #221b14;
+  --color-text-secondary: #4c4237;
+  --color-text-muted: #6d6053; /* ≥ 4.5:1 on --color-background */
+
+  --color-border: #e7dfd2;
+  --color-border-strong: #d6c9b6;
+
+  --color-primary: #b8431a;
+  --color-on-primary: #fff8f2;
+  --color-primary-strong: #93340f;
+  --color-primary-soft: #f9e8dc;
+  --color-primary-hover: #a13a15;
+
+  --color-accent: #b8431a;
+  --color-accent-soft: #f9e8dc;
+
+  --color-success: #1e6f45;
+  --color-success-soft: #e2f1e6;
+  --color-warning: #8a5a0b;
+  --color-warning-soft: #f8eed7;
+  --color-danger: #b3261e;
+  --color-danger-soft: #f9e3e0;
+  --color-info: #33597e;
+  --color-info-soft: #e5edf5;
+
+  --color-focus: #b8431a;
+  --color-ring: rgba(184, 67, 26, 0.35);
+
+  --color-scrim: rgba(28, 18, 10, 0.5);
+  --color-overlay: rgba(250, 247, 242, 0.86);
+
+  --header-bg: rgba(250, 247, 242, 0.88);
+  --skeleton-base: #eee6d9;
+  --skeleton-shine: rgba(255, 255, 255, 0.75);
+  --code-bg: #f1eadd;
+}
+
+/* ==========================================================================
+   Semantic color tokens — DARK (warm espresso)
+   ========================================================================== */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-background: #14100c;
+  --color-background-subtle: #1a1510;
+  --color-surface: #1e1913;
+  --color-surface-2: #262019;
+  --color-surface-elevated: #241f18;
+
+  --color-text: #f2eae0;
+  --color-text-secondary: #cfc2b2;
+  --color-text-muted: #a99b8a; /* ≥ 4.5:1 on --color-background */
+
+  --color-border: #2e2720;
+  --color-border-strong: #3d342a;
+
+  --color-primary: #f0743c;
+  --color-on-primary: #231006;
+  --color-primary-strong: #f79468;
+  --color-primary-soft: rgba(240, 116, 60, 0.14);
+  --color-primary-hover: #f8874f;
+
+  --color-accent: #f0743c;
+  --color-accent-soft: rgba(240, 116, 60, 0.14);
+
+  --color-success: #62c78f;
+  --color-success-soft: rgba(98, 199, 143, 0.13);
+  --color-warning: #dcaf56;
+  --color-warning-soft: rgba(220, 175, 86, 0.13);
+  --color-danger: #ea8073;
+  --color-danger-soft: rgba(234, 128, 115, 0.13);
+  --color-info: #8ab4d9;
+  --color-info-soft: rgba(138, 180, 217, 0.12);
+
+  --color-focus: #f0743c;
+  --color-ring: rgba(240, 116, 60, 0.45);
+
+  --color-scrim: rgba(5, 3, 1, 0.66);
+  --color-overlay: rgba(20, 16, 12, 0.9);
+
+  --header-bg: rgba(20, 16, 12, 0.88);
+  --skeleton-base: #241f18;
+  --skeleton-shine: rgba(255, 255, 255, 0.06);
+  --code-bg: #262019;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.4);
+}

@@ -1,0 +1,284 @@
+/* ==========================================================================
+   CULINA — Responsive behavior
+   Breakpoints (PRD §6):
+     small mobile  ≤ 479px
+     large mobile  480–767px
+     tablet        768–1023px
+     laptop        1024–1439px
+     desktop       1440–1919px
+     large desktop ≥ 1920px
+   Mobile-first: base styles target small screens; these rules scale up.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Small mobile (base) — dedicated mobile behaviour
+   -------------------------------------------------------------------------- */
+.menu-btn {
+  display: inline-flex;
+}
+
+.search-trigger {
+  min-width: 0;
+  width: var(--control-h);
+  padding: 0;
+  border-color: transparent;
+  justify-content: center;
+}
+
+.search-trigger .search-trigger-label,
+.search-trigger .kbd-hint {
+  display: none;
+}
+
+.primary-nav {
+  display: none;
+}
+
+.header-actions .desktop-only {
+  display: none;
+}
+
+.home-hero-grid {
+  grid-template-columns: 1fr;
+}
+
+.home-hero .arch-media {
+  max-width: 420px;
+  margin-inline: auto;
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+}
+
+.featured-card {
+  grid-template-columns: 1fr;
+}
+
+.featured-card .featured-media {
+  min-height: 240px;
+}
+
+.detail-hero-grid,
+.detail-sections,
+.split {
+  grid-template-columns: 1fr;
+}
+
+.detail-aside,
+.split-media {
+  position: static;
+}
+
+.planner-week {
+  grid-template-columns: 1fr;
+}
+
+.footer-inner {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6) var(--space-4);
+}
+
+.footer-brand {
+  grid-column: 1 / -1;
+}
+
+/* --------------------------------------------------------------------------
+   Large mobile ≥ 480px
+   -------------------------------------------------------------------------- */
+@media (min-width: 480px) {
+  .search-trigger {
+    min-width: 190px;
+    width: auto;
+    padding: 0 var(--space-3);
+    justify-content: flex-start;
+    border-color: var(--color-border);
+  }
+
+  .search-trigger .search-trigger-label {
+    display: inline;
+  }
+
+  .footer-inner {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tablet ≥ 768px
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .home-hero-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+
+  .featured-card {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+
+  .detail-hero-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .detail-sections {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  }
+
+  .detail-aside {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-5));
+  }
+
+  .planner-week {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .footer-brand {
+    grid-column: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Laptop ≥ 1024px — full desktop navigation
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .primary-nav {
+    display: flex;
+  }
+
+  .menu-btn {
+    display: none;
+  }
+
+  .header-actions .desktop-only {
+    display: inline-flex;
+  }
+
+  .search-trigger .kbd-hint {
+    display: inline-flex;
+  }
+
+  .planner-week {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Desktop ≥ 1440px
+   -------------------------------------------------------------------------- */
+@media (min-width: 1440px) {
+  .planner-week {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Large desktop ≥ 1920px — cap content width, loosen rhythm
+   -------------------------------------------------------------------------- */
+@media (min-width: 1920px) {
+  html {
+    font-size: 17.5px;
+  }
+}
+
+/* ==========================================================================
+   Print — clean recipe printing (PRD §13: Print)
+   ========================================================================== */
+@media print {
+  .site-header,
+  .site-footer,
+  .detail-actions,
+  .fav-btn,
+  .toast-root,
+  .skip-link,
+  .detail-aside .source-panel a[href^='http']::after {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .page {
+    padding: 0;
+  }
+
+  .detail-sections {
+    display: block;
+  }
+
+  .detail-aside {
+    position: static;
+    margin-bottom: 2rem;
+  }
+
+  .detail-hero-grid {
+    display: block;
+  }
+
+  .detail-hero-media {
+    max-width: 420px;
+  }
+
+  .card,
+  .detail-hero-media,
+  .featured-card {
+    box-shadow: none !important;
+    border-color: #ddd;
+  }
+
+  .steps li p,
+  .ingredient-list {
+    color: #000;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion (PRD §8 / WCAG 2.2 — 2.3.3)
+   Applied in addition to the JS-side guard in js/utils/motion.js
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+  }
+
+  .card.is-clickable:hover,
+  .quick-action:hover,
+  .category-tile:hover,
+  .hub-tile:hover {
+    transform: none;
+  }
+
+  .card.is-clickable:hover .card-media img {
+    transform: none;
+  }
+}
