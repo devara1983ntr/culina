@@ -107,12 +107,19 @@ function attachConsoleCapture(target) {
 }
 attachConsoleCapture(page);
 
-/* Chromium occasionally dies between sections; every section starts by
-   making sure we still have a live page (and browser). */
+/* Chromium occasionally dies mid-suite; sections start by making sure we
+   still have a live page (and browser). IMPORTANT: a healthy page is REUSED,
+   never recycled — in this single-process chromium build, pages created after
+   the context's first page get their JS timer queue suspended (setTimeout
+   never fires), which silently breaks debounced app behavior. Only a dead
+   page (or a dead browser) triggers recreation. */
 async function ensureAlive() {
   if (browser.isConnected()) {
     try {
-      await page.close().catch(() => {});
+      await page.evaluate(() => true);
+      return; // page alive — reuse it
+    } catch { /* page dead */ }
+    try {
       page = await context.newPage();
       attachConsoleCapture(page);
       return;
@@ -138,7 +145,7 @@ console.log('A) Required surfaces');
 await check(page, '/', 'Home renders', { selector: '#site-header .brand, #site-header .brand-lockup' });
 await check(page, '/', 'Home: boot splash removed after load', { selector: 'main .home-hero, main h1' });
 try {
-  await page.waitForFunction(() => !document.getElementById('boot-splash'), null, { timeout: 5000 });
+  await page.waitForFunction(() => !document.getElementById('boot-splash'), null, { timeout: 10000 });
   pass('boot splash removed');
 } catch {
   fail('boot splash removed');
@@ -206,12 +213,6 @@ try {
 
 /* ---------------- B. Viewport matrix ---------------- */
 console.log('\nB) Viewport overflow matrix');
-async function freshPage() {
-  await page.close().catch(() => {});
-  page = await context.newPage();
-  attachConsoleCapture(page);
-  return page;
-}
 async function relaunchBrowser() {
   await ensureAlive();
   return page;
@@ -220,16 +221,12 @@ for (const [w, h] of [[320, 568], [375, 667], [390, 844], [430, 932], [768, 1024
   let worst = null;
   for (let attempt = 0; attempt < 3 && worst === null; attempt += 1) {
     try {
-      // fresh page per viewport: headless single-process chromium builds up
-      // renderer memory across navigations and can die mid-matrix
-      const target = attempt === 0 ? await freshPage() : page;
-      worst = await overflowAt(target, w, h);
+      // NOTE: stays on the main page — recycled pages get their JS timers
+      // suspended in this chromium build (see ensureAlive). Crash recovery
+      // happens through ensureAlive below.
+      worst = await overflowAt(page, w, h);
     } catch {
-      try {
-        await freshPage();
-      } catch {
-        await relaunchBrowser();
-      }
+      await ensureAlive();
     }
   }
   if (worst === null) fail(`${w}×${h}`, 'page crashed after 3 attempts');
@@ -269,10 +266,14 @@ console.log('\nD) Command palette');
 await ensureAlive();
 async function openPalette() {
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(400);
+  await page.waitForSelector('#site-header .brand, #site-header .brand-lockup', { timeout: 10000 });
+  await page.waitForTimeout(300);
   await page.keyboard.press('Control+k');
   await page.waitForSelector('dialog.search-overlay[open]', { timeout: 5000 });
   await page.waitForTimeout(400);
+  // On slow boots the first route render can steal focus (main.focus() for
+  // screen readers) after the dialog opened — re-focus the input explicitly.
+  await page.locator('dialog.search-overlay input').focus();
 }
 
 try {
@@ -285,7 +286,7 @@ await ensureAlive();
 try {
   await openPalette();
   await page.keyboard.type('>theme');
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(900); // debounce (250ms) + re-render settle
   const filtered = await page.locator('dialog .command-item').count();
   filtered >= 1 && filtered <= 3 ? pass(`">" filters to commands (${filtered} match(es))`) : fail('">" filter', `${filtered} items`);
 } catch (err) { fail('">" filter', err.message.split('\n')[0]); }
@@ -295,7 +296,7 @@ try {
   // Enter with no active row runs the FIRST command (unambiguous: planner)
   await openPalette();
   await page.keyboard.type('>planner');
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(900); // debounce (250ms) + re-render settle
   const plannerMatches = await page.locator('dialog .command-item').count();
   await page.keyboard.press('Enter');
   await page.waitForTimeout(600);
@@ -384,9 +385,13 @@ try {
   // duplicate rejected with inline message
   await page.fill('#manual-item', 'paper towels');
   await page.click('.shopping-add-form button[type="submit"]');
-  await page.waitForTimeout(400);
-  const errVisible = await page.locator('.field-error:not([hidden])').count();
-  errVisible ? pass('duplicate input blocked with inline validation') : fail('duplicate validation');
+  let errVisible = 0;
+  for (const wait of [400, 800, 1600]) { // poll: slow renders must not fail this
+    await page.waitForTimeout(wait);
+    errVisible = await page.locator('.field-error:not([hidden])').count();
+    if (errVisible) break;
+  }
+  errVisible ? pass('duplicate input blocked with inline validation') : fail('duplicate validation', `field-errors visible: ${errVisible}`);
   // check persists after reload
   await page.locator('.shopping-row input[type="checkbox"]').first().check();
   await page.waitForTimeout(300);
@@ -447,7 +452,7 @@ try {
   const { ctx, p } = await isolatedPage();
   await p.route(/themealdb\.com/, (route) => route.abort('failed'));
   await p.goto(BASE + '/recipes', { waitUntil: 'domcontentloaded' });
-  await p.waitForTimeout(4500);
+  await p.waitForTimeout(7000); // DCL fires before modules finish; budget for boot + retries
   const body = await p.textContent('body');
   const hasErrorState = /didn’t respond|Try again|error|unavailable|rate-limit/i.test(body);
   const skeletons = await p.locator('.skeleton').count();

@@ -92,7 +92,7 @@ jobs:
         env:
           CULINA_QA_ENGINE: ${{ matrix.engine }}
           CULINA_QA_EXECUTABLE: ${{ steps.browser.outputs.executable }}
-        run: node scripts/browser-qa.mjs
+        run: node scripts/run-qa.mjs
 
       - name: Post-run smoke test
         run: |

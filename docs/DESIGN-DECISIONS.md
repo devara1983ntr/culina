@@ -88,3 +88,15 @@ Swipe-to-delete is implemented on shopping-list rows. Planner items deliberately
 ## 17. Icon registry is part of the build contract
 
 `js/utils/icons.js` holds a tree-shaken lucide subset; `refreshIcons()` silently skips any `data-lucide` name not in that set (console warning only). The static audit therefore checks two things: the name exists in lucide **and** it is registered in the set. This caught 13 used-but-unregistered icons (sun-moon, house, mic, palette, …) that rendered as invisible gaps.
+
+## 18. Observability: privacy over telemetry
+
+CULINA ships **no client-side error or performance telemetry**. This is deliberate, not an omission: the product promise is that nothing leaves the device (PRD §48), and any third-party analytics beacon would break it. The operational signal is layered instead: `/healthz` for uptime, the in-app provider health center (per-provider latency/success telemetry kept locally), and DEV-gated console diagnostics in the API client that vanish in production. Field-error visibility is traded away consciously; operators watch the gateway and provider status.
+
+## 19. Heading-level contract
+
+Shared content components own their heading level: **card titles, hub tiles, state-block titles, footer column titles and the surprise stage are all `h2`**. Rationale: these appear directly under a page's `h1` on listing pages, and a page-level `h3` would skip an outline level (WCAG heading navigation). `sectionHead` remains `h2` and deeper structures (`h3` facts, list items) stay below. The E2E accessibility section enforces "one `h1`, no skipped levels" across representative routes on both browser engines — a regression here fails CI.
+
+## 20. Service-worker registration must not race `load`
+
+Registration originally attached a `window.addEventListener('load', …)` from inside `boot().then()`. On a fast load with slow provider data, `load` fires first and the listener is never called — silently losing offline support for that visit. The registration now lives at module scope with a `document.readyState === 'complete'` guard. The bug was invisible until the E2E suite ran with raster images blocked (fast `load`) and found zero registrations; it is exactly the kind of race the QA environment should be tuned to expose.

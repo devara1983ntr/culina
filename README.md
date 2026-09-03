@@ -104,16 +104,72 @@ The test suite caught five real bugs before shipping (broken import paths, a wro
 
 **Static audit** (`scripts/audit.mjs`, `npm run audit`): every relative import resolves; every class used in JS exists in a stylesheet (template-literal aware); every `icon()` name exists in lucide **and is registered in `js/utils/icons.js`**; every route has a loader and every static internal link matches a route shape.
 
-**Browser E2E** (`scripts/browser-qa.mjs`, `npm run test:ui`): **67 checks** against the production build, grouped in eight sections — (A) all 34 surfaces incl. deep links, boot splash, planner grid, sticky recipe action bar; (B) horizontal-overflow matrix across 320–1440 px on 6 pages; (C) mobile bottom nav (visibility, 5 destinations, active state, body clearance, hidden on desktop); (D) ⌘K/K command palette (commands, `>` filter mode, Enter executes, Escape, `/` shortcut); (E) theme switching + persistence across reload; (F) history recording and shopping-list manual items + inline validation + check persistence; (G) SPA navigation without reload, back/forward; (H) failure injection — offline detection toast, provider outage → graceful error state with no stuck skeletons, recovery, malformed-JSON safety, and a no-stuck-loading audit. Requires a one-time setup outside the project:
+**Gateway tests** (`scripts/gateway-test.mjs`): **40 assertions** against the production server — security headers (CSP with startup-computed script hash, nosniff, DENY, Referrer-Policy, Permissions-Policy, COOP), SPA fallback, asset immutability, proxy path allowlist, method guard, `/healthz`, path-traversal defense, sitemap coverage, manifest MIME, `X-Robots-Tag` on app-internal routes.
+
+**Browser E2E** (`npm run test:ui` → `scripts/run-qa.mjs`, which runs `scripts/browser-qa.mjs` and re-runs the full suite exactly once — loudly, and only when every failure is infrastructure-class such as a sandboxed browser death; assertion failures never trigger a retry): **82 checks** against the production build, grouped in eight sections — (A) all 34 surfaces incl. deep links, boot splash, planner grid, sticky recipe action bar; (B) horizontal-overflow matrix across 320–1440 px on 6 pages; (C) mobile bottom nav (visibility, 5 destinations, active state, body clearance, hidden on desktop); (D) ⌘K/K command palette (commands, `>` filter mode, Enter executes, Escape, `/` shortcut); (E) theme switching + persistence across reload; (F) history recording and shopping-list manual items + inline validation + check persistence; (G) SPA navigation without reload, back/forward; (H) failure injection — offline detection toast, provider outage → graceful error state with no stuck skeletons, recovery, malformed-JSON safety, and a no-stuck-loading audit; (I) accessibility — landmarks, heading outline, skip-link focus, focus ring, ≥44 px touch targets, aria-hidden decorative icons, image alts, contrast spot-checks in both themes, dialog focus/Escape; (J) PWA & performance — service-worker control, **offline hard-reload serving the cached shell**, honest offline states, online recovery, and a navigation-timing baseline. Requires a one-time setup outside the project:
 
 ```bash
 npm i -g playwright-core @sparticuz/chromium   # or install locally and run from that directory
-node scripts/browser-qa.mjs                    # with the server running on :3000
+npm run test:ui                                # with the server running on :3000
 ```
 
 Notes: route interception patterns must be **RegExp** — playwright-core 1.6x scheme-less globs don't match cross-origin URLs; the suite blocks raster images at the network layer (the ~2 GB sandbox OOMs otherwise) and recycles pages between sections because headless single-process chromium accumulates renderer memory.
 
-Last run: **67/67 passed, no unexpected console/page errors.**
+Runs on **Chromium and Firefox** (`CULINA_QA_ENGINE=firefox CULINA_QA_EXECUTABLE=<path> npm run test:ui`).
+
+Last run: **82/82 on Chromium and 82/82 on Firefox, no unexpected console/page errors.**
+
+## Deployment
+
+The production artifact is `dist/` served by the zero-dependency gateway:
+
+```bash
+npm run build     # → dist/
+npm start         # node server.js — static + SPA fallback + allowlisted proxy on $PORT (default 3000)
+```
+
+What the gateway provides (all verified by `scripts/gateway-test.mjs`):
+
+- **Security headers on every response**: enforced CSP (`script-src 'self'` + a startup-computed SHA-256 hash of the single inline theme-bootstrap script; `connect-src` limited to the enabled provider origins), `X-Content-Type-Options`, `X-Frame-Options: DENY` + `frame-ancestors 'none'`, `Referrer-Policy`, `Permissions-Policy` (microphone deliberately allowed — voice search), COOP, and HSTS when the request arrives over HTTPS.
+- **SPA routing**: unknown paths fall back to the shell; assets with extensions 404 properly; hashed `/assets/*` are `immutable`.
+- **Allowlisted reverse proxy** (`/api/fruityvice/*` — strict path regex, GET only, 12 s upstream timeout) for the one CORS-restricted provider. A key-requiring provider would use the same pattern with the key in this process's environment, never in the browser bundle.
+- **`/healthz`** for uptime checks (`no-store`).
+- **`X-Robots-Tag: noindex`** on `/settings`, `/history`, `/favorites`, `/offline` (personal/app pages; the client also sets `<meta name="robots">` on SPA navigation).
+
+Operator checklist for a public deployment:
+
+1. Terminate TLS at your proxy and forward `X-Forwarded-Proto` (the gateway then sends HSTS).
+2. Set the public origin and prefix `public/sitemap.xml` `<loc>` values with it (the sitemap ships origin-relative; the spec prefers absolute).
+3. Point your uptime monitor at `/healthz`.
+4. Rollback = redeploy the previous `dist/` (immutable asset hashes make this safe).
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every push/PR:
+
+1. **quality** job — `npm ci` → 70 unit tests → static audit → production build → `npm audit --audit-level=high` → 40 gateway assertions → dist artifact upload.
+2. **e2e** job (matrix: **Chromium + Firefox**) — rebuild, install browsers via `playwright-core`, boot the production gateway, run the 82-check browser suite, then a post-run smoke test (`/healthz`, shell title, CSP header).
+
+A deployment must only happen from a green pipeline. Failures in any gate block promotion — nothing is configured to be ignored.
+
+## Browser support
+
+| Browser | Status | Evidence |
+| --- | --- | --- |
+| Chrome/Chromium desktop (headless) | **Tested** — full 82-check E2E | `npm run test:ui` (default engine) |
+| Firefox desktop (Playwright's Firefox build) | **Tested** — full 82-check E2E | `CULINA_QA_ENGINE=firefox` |
+| Safari / iOS Safari | **Not tested** in this environment — no sandbox availability | Uses only evergreen web platform features (native `<dialog>`, ES2020, CSS custom properties); voice search is feature-detected and absent where unsupported |
+| Chrome Android | **Not tested** (no device); mobile layout verified via 320–430 px viewports + touch-target audits | E2E section B/C |
+| Edge | **Not tested**; Chromium-engine — expected to track the Chromium results | — |
+
+Claims above reflect actual test runs; untested targets are listed as untested.
+
+## Troubleshooting
+
+- **`vite: not found`** → run `npm ci` (node_modules is not committed).
+- **E2E "provider outage" fails with real cards rendering** → an active service worker fetched the data itself (by design). The suite isolates injection tests in a `serviceWorkers: 'block'` context; if you adapt the tests, keep that isolation.
+- **E2E browser crashes (low-memory runners)** → the suite already blocks raster images and recycles pages; give the runner more RAM or run engines separately.
+- **Fonts/icons missing in a reverse-proxied deployment** → keep `/assets/*` served with the immutable cache header and don't rewrite asset paths.
 
 ## Project structure
 
@@ -132,7 +188,7 @@ culina/
 │   ├── utils/                 # dom, format, icons (lucide), motion (reveal), a11y
 │   └── app.js / main.js       # router bootstrap, page loaders, error boundary, SW registration
 ├── public/                    # manifest, sw.js, offline.html, robots, sitemap, icons
-├── scripts/                   # generate-icons.py (brand mark, PIL), browser-qa.mjs
+├── scripts/                   # generate-icons.py (brand mark, PIL), browser-qa.mjs + run-qa.mjs (infra-retry wrapper)
 ├── tests/                     # 4 test files + helpers
 ├── docs/                      # API-VERIFICATION.md, DESIGN-DECISIONS.md
 └── design-system/culina/MASTER.md   # generated design system (UI/UX Pro Max skill)
