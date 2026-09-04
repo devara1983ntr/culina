@@ -104,7 +104,7 @@ Registration originally attached a `window.addEventListener('load', …)` from i
 
 ## 21. The approved brand board is the visual source of truth (v1.1.0)
 
-The product's first identity ("open-ring plate", espresso/ember palette, Libre Bodoni + Public Sans) was a placeholder system generated before the approved brand board existed. As of 1.1.0 the board (`docs/brand/culina-brand-board.png`) supersedes it:
+The product's first identity ("open-ring plate", espresso/ember palette, Libre Bodoni + Public Sans) was a placeholder system generated before the approved brand board existed. As of 1.1.0 the brand board (v1.2.0 archive: `assets/brand/archive/v1.2.0/source/`) superseded it; as of 1.3.0 the supplied originals (`assets/brand/source/`) supersede both:
 
 - **Palette mapping.** Brand primitives (Ember Gold `#FFB703`, Spicy Orange `#FB5607`, Fresh Green `#2ECC71`, Deep Crimson `#E63946`, Midnight `#0B0F19`, Cream `#FFF7E6`) map to the existing semantic token names, values only — components were untouched. The **dark theme carries the board's vivid hues directly** (all AA on Midnight), while the **light theme uses deepened shades of the same hues** (deep orange `#C2410C`, deep green `#1E7A45`, deep gold `#8A6400`, deep crimson `#B3241E`) because the vivid values cannot pass 4.5:1 as text on Cream. Every critical pairing is computed and asserted by `scripts/verify-contrast.py` (17.96:1 body text, 4.86–6.18:1 semantic text, 10.97:1 gold-on-Midnight buttons, 5.09/9.83:1 focus indicators).
 - **Borders are decorative separators** (subtle by intent, ~1.5–1.9:1); WCAG 1.4.11 state information is carried by the ≥3:1 focus ring, labels and text — the same interpretation the shipped accessibility audits used.
@@ -128,3 +128,29 @@ CULINA lettering and its painted tagline matches no real typeface (measured),
 so wordmark typography uses Playfair Display Italic outlines — a documented
 derivation, not a claimed trace. The full inventory, fidelity numbers, safe
 areas and minimum sizes live in `docs/BRAND-ASSET-MANIFEST.md`.
+
+## 22. v1.3.0: the supplied artwork supersedes the traced-type derivation (v1.3.0)
+
+The user-supplied originals (`assets/brand/source/culina-logo-board.png` —
+logo composition; `culina-emblem-master.png` — emblem master) are the
+identity. They supersede the v1.2.0 board and §21's derived typography:
+
+- **Emblem** — 14-layer k-means trace of the master (union IoU 0.908): the
+  golden C ring, white chef hat in the opening, fork at center, flame + red
+  cocktail, green sprigs. No approximation, no redraw.
+- **Wordmark + tagline + ornament** — traced from the board's own paint
+  (three-tone gold/deep-gold/white CULINA, IoU 0.81–0.93; tagline 0.908;
+  ornament 0.881). This *replaces* §21's Playfair-outline derivation: the
+  type identity is now the artwork's own letterforms, so no font license or
+  substitution question attaches to the wordmark asset.
+- **Grounds** — the board presents the emblem on Midnight; the app icon /
+  favicon tile therefore carries a Midnight #0B0F19 square (the §26 tokens
+  are unchanged).
+- **§13 tiers** — ≥64 px full geometry; ≤48 px a six-family simplification
+  (see `docs/brand/BOARD-FORENSICS.md`) with size-tiered thinning; never a
+  blind downscale.
+- **Palette** — sampled trace layers are source fidelity data; the product's
+  semantic tokens stay the spec (§26), with AA-verified shades unchanged.
+
+The v1.2.0 asset set, its board and scripts are archived under
+`assets/brand/archive/v1.2.0/`; nothing live references them.

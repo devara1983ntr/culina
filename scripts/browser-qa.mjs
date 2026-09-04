@@ -459,10 +459,15 @@ try {
   const { ctx, p } = await isolatedPage();
   await p.route(/themealdb\.com/, (route) => route.abort('failed'));
   await p.goto(BASE + '/recipes', { waitUntil: 'domcontentloaded' });
-  await p.waitForTimeout(7000); // DCL fires before modules finish; budget for boot + retries
-  const body = await p.textContent('body');
-  const hasErrorState = /didn’t respond|Try again|error|unavailable|rate-limit/i.test(body);
-  const skeletons = await p.locator('.skeleton').count();
+  // DCL fires before modules finish; poll for the error state — cold module
+  // boot + provider retry backoff can exceed 10s on a loaded sandbox.
+  let hasErrorState = false, skeletons = -1;
+  for (let t = 0; t < 15 && !(hasErrorState && skeletons === 0); t++) {
+    await p.waitForTimeout(1000);
+    const body = await p.textContent('body');
+    hasErrorState = /didn’t respond|Try again|error|unavailable|rate-limit/i.test(body);
+    skeletons = await p.locator('.skeleton').count();
+  }
   hasErrorState && skeletons === 0 ? pass('provider outage → graceful error state (no stuck skeletons)') : fail('provider outage', `errorUI=${hasErrorState} skeletons=${skeletons}`);
   await p.unroute(/themealdb\.com/);
   // recovery — real provider data must come back (30s: cold module boot +
@@ -761,15 +766,18 @@ try {
       isSvg: mark ? mark.tagName.toLowerCase() === 'svg' : false,
       gradients: mark ? mark.querySelectorAll('linearGradient').length : 0,
       paths: mark ? mark.querySelectorAll('path').length : 0,
-      midnight: mark ? !!mark.querySelector('path[fill="#0b0f19"], path[fill="#0B0F19"]') : false,
-      green: mark ? !!mark.querySelector('path[fill="#2ecc71"], path[fill="#2ECC71"]') : false,
+      raster: mark ? mark.querySelectorAll('image').length : 0,
+      midnightTile: mark ? !!mark.querySelector('rect[fill="#0B0F19"]') : false,
+      gold: mark ? !!mark.querySelector('path[fill="#F7B728"]') : false,
+      cream: mark ? !!mark.querySelector('path[fill="#F6F0E7"]') : false,
       word: word ? word.textContent.trim() : null,
       font: word ? getComputedStyle(word).fontFamily : '',
       bg: getComputedStyle(document.body).backgroundColor,
     };
   });
-  lockup.isSvg && lockup.paths >= 2 && lockup.midnight && lockup.green && lockup.gradients === 0
-    ? pass('header renders the traced flat C-mark (inline SVG: Midnight C + green sprigs)')
+  lockup.isSvg && lockup.paths >= 5 && lockup.midnightTile && lockup.gold && lockup.cream &&
+    lockup.gradients === 0 && lockup.raster === 0
+    ? pass('header renders the traced emblem on its midnight tile (inline SVG, no raster)')
     : fail('header mark', JSON.stringify(lockup));
   lockup.word === 'CULINA' && /Playfair Display/.test(lockup.font)
     ? pass('wordmark is CULINA in Playfair Display')
@@ -805,6 +813,7 @@ try {
     const paths = [
       '/brand/culina-mark-tile.svg', '/brand/culina-logo.svg',
       '/brand/culina-mark.svg', '/brand/culina-emblem.svg', '/brand/culina-lockup.svg',
+      '/brand/culina-wordmark.svg',
       '/brand/culina-logo-dark.png', '/favicon.ico', '/favicon-48.png',
       '/social/og-image.png', '/social/twitter-card.png',
       '/icons/icon-512.png', '/icons/icon-maskable-192.png', '/icons/favicon.svg',

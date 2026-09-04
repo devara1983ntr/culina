@@ -4,6 +4,47 @@ All notable changes to CULINA are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-09-04
+
+Brand re-engineering: the identity is **traced from the supplied original
+artwork** (`assets/brand/source/` — logo board + emblem master), which
+supersedes the v1.2.0 board and its derived typography.
+
+### Changed
+- **Emblem** — re-traced from the emblem master: 14 k-means color layers
+  (union IoU 0.91) capturing the golden C ring, white chef hat, fork, flame,
+  red cocktail and green sprigs. All mark/emblem/logo/lockup assets recomposed.
+- **Wordmark, tagline, ornament** — now **traced from the board's own paint**
+  (three-tone CULINA letterforms, IoU 0.81–0.93; *TASTE • DISCOVER • PLAN •
+  ENJOY*; utensil ornament). This replaces the v1.2.0 Playfair-outline
+  derivation — the type identity is the artwork's own.
+- **Tile ground flipped to Midnight** — favicon/app-icon tile and the embedded
+  header mark (`js/components/mark-tile.js`, regenerated) now present the
+  simplified six-family emblem on a Midnight #0B0F19 square (the artwork's own
+  app-icon presentation).
+- **Social cards** recomposed: emblem + CULINA + tagline + ornament +
+  *Discover food. Understand it. Make it yours.* on Midnight (1200×630 /
+  1200×628), within the canvas ink budget.
+- **Public logo PNGs** now render at natural aspect (512×456 / 512×426) —
+  no more letterboxed 512×185 crops.
+- SW cache version → 1.3.0.
+
+### Added
+- `culina-wordmark.svg` / `culina-wordmark-light.svg` to the served family
+  (13 SVGs total); raster family gains transparent + light variants
+  (24 renders, 52 rasterization targets).
+- Gateway contract: no raster embeds in any served `/brand` SVG; tile-module
+  embed asserted **path-for-path**; PNG dims at natural aspect (391 assertions).
+- E2E section K: header = traced emblem on Midnight tile (paths ≥ 5, no
+  gradients, no raster); `/brand/culina-wordmark.svg` resolves (92 checks).
+- `docs/brand/BOARD-FORENSICS.md` rewritten for the new sources (layout map,
+  trace IoUs, six-family §13 table).
+
+### Removed
+- The v1.2.0 monogram asset family (monogram, monogram-cream,
+  wordmark-midnight) and its build geometry — **archived** complete under
+  `assets/brand/archive/v1.2.0/` (with the v1.2.0 board and scripts).
+
 ## [1.2.0] — 2026-09-04
 
 Brand asset engineering: the identity is now **traced from the approved

@@ -55,18 +55,21 @@ The dev server and the production gateway both provide the `/api/fruityvice` rev
 | **Surprise me** | Weighted random discovery across recipes, cocktails, fruits, breweries and food imagery |
 | **API Health center** (`/health`) | Live status, latency, classification and on-demand diagnostics for all 28 registered providers — passive telemetry only, no background polling |
 | **PWA** | Installable, offline fallback page, service worker (network-first navigations, immutable asset cache, TTL-capped API cache) |
-| **Design** | Approved brand identity ([board](docs/brand/culina-brand-board.png)) — Ember Gold / Spicy Orange / Fresh Green / Deep Crimson / Midnight / Cream, Playfair Display + Inter, light/dark themes (persisted), WCAG 2.2 AA targets (contrast-verified tokens), `prefers-reduced-motion` support, mobile-first at 6 breakpoints |
+| **Design** | Approved brand identity ([sources](assets/brand/source/culina-logo-board.png)) — Ember Gold / Spicy Orange / Fresh Green / Deep Crimson / Midnight / Cream, Playfair Display + Inter, light/dark themes (persisted), WCAG 2.2 AA targets (contrast-verified tokens), `prefers-reduced-motion` support, mobile-first at 6 breakpoints |
 
 ## Brand identity
 
-The approved identity lives in [`docs/brand/culina-brand-board.png`](docs/brand/culina-brand-board.png):
-a golden/orange **C** incorporating a chef hat, fork, spoon, fresh green leaf,
-cocktail element and culinary flame, presented on Midnight with Cream
-typography — *TASTE • DISCOVER • PLAN • ENJOY*.
+The approved identity lives in the supplied originals —
+[`assets/brand/source/culina-logo-board.png`](assets/brand/source/culina-logo-board.png)
+(the logo composition) and
+[`assets/brand/source/culina-emblem-master.png`](assets/brand/source/culina-emblem-master.png)
+(the emblem master): a golden/orange **C** incorporating a chef hat, fork,
+flame, red cocktail and fresh green sprigs, presented on Midnight with the
+traced CULINA wordmark and tagline — *TASTE • DISCOVER • PLAN • ENJOY*.
 
 - **Palette** — Ember Gold `#FFB703` · Spicy Orange `#FB5607` · Fresh Green `#2ECC71` · Deep Crimson `#E63946` · Midnight `#0B0F19` · Cream `#FFF7E6`. Deepened/lightened shades of these hues appear only where WCAG 2.2 AA contrast requires them (every pairing verified by `scripts/verify-contrast.py`).
 - **Typography** — Playfair Display for editorial display moments, Inter for UI/body. Self-hosted via Fontsource (OFL), subset to latin, `font-display: swap`.
-- **Assets** — all brand geometry is **traced from the approved board** (`scripts/brand/trace_monogram.py`, `scripts/brand/trace_emblem.py`; IoU-measured) and composed by `python3 scripts/generate-brand-assets.py` + `node scripts/rasterize-brand.mjs` into the full family (mark, emblem, monogram, wordmark, lockup, logos, favicons incl. `.ico`, 14-size icon set, maskable PWA icons, OG/Twitter cards). Canonical files live in `assets/brand/{vector,raster,icons,favicon,pwa,social,master,source,archive}` and mirror byte-for-byte into `public/` — asserted by the gateway suite. Full inventory + fidelity + safe areas: `docs/BRAND-ASSET-MANIFEST.md`.
+- **Assets** — all brand geometry is **traced from the supplied artwork** (`scripts/brand/trace_emblem.py`, `trace_wordmark.py`, `trace_tagline.py`; IoU-measured) and composed by `python3 scripts/generate-brand-assets.py` + `node scripts/rasterize-brand.mjs` into the full family (mark, emblem, wordmark, lockup, logos, favicons incl. `.ico`, 14-size icon set, maskable PWA icons, OG/Twitter cards). Canonical files live in `assets/brand/{vector,raster,icons,favicon,pwa,social,source,archive}` and mirror byte-for-byte into `public/` — asserted by the gateway suite. Full inventory + fidelity + safe areas: `docs/BRAND-ASSET-MANIFEST.md`.
 
 ## Architecture
 

@@ -18,8 +18,9 @@ opening a PR.
    visible focus, ≥44 px touch targets, 4.5:1 contrast in both themes,
    `prefers-reduced-motion` respected. Design tokens only — no hardcoded
    colors outside `css/tokens.css`.
-5. **The approved brand identity** (`docs/brand/culina-brand-board.png`) is
-   the visual source of truth. Brand geometry is generated — run
+5. **The approved brand identity** (`assets/brand/source/` — the logo board
+   and emblem master originals) is the visual source of truth. Brand geometry
+   is generated — run
    `python3 scripts/generate-brand-assets.py` (see its header for the
    rasterizer) rather than editing SVGs by hand.
 

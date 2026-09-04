@@ -1,103 +1,83 @@
-# CULINA Brand Board — Forensic Analysis
+# CULINA Brand Sources — Forensic Analysis (v1.3.0)
 
-Source of truth: `docs/brand/culina-brand-board.png` (copy of
-`uploads/file_000000001760821185b32dcf0edf5d01.png`), 1536×1024, midnight ground.
-Method: programmatic only (color classification masks, connected components,
-glyph bitmap segmentation). No vision available; ASCII-map technique.
+Sources of truth (user-supplied originals; supersede the v1.2.0 brand board,
+which is archived under `assets/brand/archive/v1.2.0/`):
 
-## Board layout (verified coordinates)
+| ID | File | Size | Role |
+|---|---|---|---|
+| **IMG-A** | `assets/brand/source/culina-logo-board.png` | 1329×1183 | Logo composition: emblem + wordmark + tagline + ornament, stacked |
+| **IMG-B** | `assets/brand/source/culina-emblem-master.png` | 1254×1254 | Emblem master — isolated, finer detail; the trace source for the emblem |
+
+Method: programmatic only (k-means color clustering, connected components,
+glyph bitmap segmentation, band profiling). No vision available; hue-ASCII
+map technique for visual verification.
+
+## IMG-A — logo board layout (verified regions)
 
 | Region | Coordinates | Content |
 |---|---|---|
-| **Hero emblem illustration** | (208,64)–(484,433), 276×369 | Large culinary "C" emblem: cream→light-gold→gold→orange ribbon sweep, fork (parallel tines) in counter, deep-red accent (#C50201), green garnish accents, gold bottom arc |
-| **Panel A badge** (primary) | (871,67)–(1008,222), 137×155 | Cream roundel (#FEF5E3) + full-color emblem: gold/orange diagonal C mass, crimson/orange cocktail cluster right, cream hat mass, green specks, dark ground (#2C2F33) |
-| **Panel B badge** (monogram) | (871,243)–(1007,392), 136×149 | Cream roundel + flat dark monogram: bold C whose top terminal swells chef-hat-like, fork with separated tines nested in aperture, green herb sprigs |
-| **Illustration column** | x744–828 (y92–205, y299–374, y435–474) | Small culinary illustrations |
-| **Top-right illustration** | (1413,101)–(1496,192) | Leaf/herb illustration |
-| **Mid-right illustrations** | (1102,319)–(1184,408), (900–1293, 660–705) | Culinary illustrations (bottle, leaf) |
-| **Ingredient row** | x98–824, y438–554 | Ingredient illustrations |
-| **Palette strip** | y480–538 | 5 swatches + midnight bg |
-| **Utensil ornament** | x196–500, y538–550 | Gold knife/fork/spoon glyph row |
-| **TAGLINE** | x100–587, y576–587 | `TASTE • DISCOVER • PLAN • ENJOY` — cream, italic serif, round bullets (verified glyph-by-glyph) |
-| **Divider** | y602–616 | Horizontal rule + diamond center |
-| **Icon strip** | x222–496, y627–662 | Gold outline icons: herb sprig, leaf, martini glass, serving dome, fork, ladle |
-| **App-icon mockup** | (1110,780)–(1170,840), 60×60 | Cream rounded square + dark monogram + green herb accents (Panel B language) |
-| **Device mockups** | y678–1024 | Phones/laptop showing app UI |
+| **Emblem** | x178–1148, y49–830 | The full-color culinary emblem (below) |
+| **Wordmark** | x170–1156, y830–1022 (ink 178.2–1144.8 × 830.0–1021.8) | `CULINA` — serif capitals with high-contrast strokes, three-tone paint (gold body, deep-gold shade, white sparkle) |
+| **Tagline** | x226–1106, y1066–1100 (ink 227.8–1102.5 × 1071.0–1096.8) | `TASTE • DISCOVER • PLAN • ENJOY` — letter-spaced small caps, amber #D8921E |
+| **Ornament** | x398–942, y1112–1150 (ink 415.5–929.2 × 1118.0–1149.5) | Gold utensil/garnish flourish row, #784500 |
 
-## Palette (sampled)
+Wordmark metrics: cap height 191.8 px on a 966.6 px ink width (ratio 5.04:1) —
+the vector wordmark reproduces the traced letterforms at ink height, so the
+type identity is the artwork's own, not a substituted font.
 
-| Swatch | x-range | Sampled | Spec token |
+## IMG-B — emblem master (the identity)
+
+Read from the trace layers, outer to inner:
+
+- A **golden "C" ring** — the dominant mass: pale gold highlights (#FBF9F3,
+  #FCEE96) over a gold→orange sweep (#FACB31, #F6A815, #E17C08, #B15907).
+- A **white chef hat** cradled in the ring's upper opening (#FBF9F3/#EEE4D2
+  with #D2BBA4/#B49069 shading).
+- A **fork** at the center counter, tines up.
+- A **flame and a red cocktail glass** in the lower-right opening
+  (#E61F03, #8C2303).
+- **Green herb sprigs** flanking the composition (#437503, #83B50B).
+
+Trace region (60,40)–(1190,1140); ink bbox (84.0,58.5)–(1164.5,1122.0).
+
+## Trace quality (IoU vs source masks)
+
+| Asset | Layers | Union IoU | Notes |
 |---|---|---|---|
-| Gold | 1034–1089 | `#FDB10B` | `--culina-ember-gold` (#FFB703) |
-| Orange | 1113–1167 | `#FE4F00` | `--culina-spicy-orange` (#FB5607) |
-| Green | 1192–1246 | `#30BD71` | `--culina-fresh-green` (#2ECC71) |
-| Crimson | 1274–1330 | `#E82F3C` | `--culina-deep-crimson` (#E63946) |
-| Cream | 1438–1494 | `#FDF6E7` | `--culina-cream` |
-| Midnight | board ground | (dark, ~#10131A family) | `--culina-midnight` |
+| Emblem (IMG-B) | 14 color layers | **0.9084** | best #FBF9F3 0.9484 · worst #B15907 0.8437 |
+| Wordmark (IMG-A) | 3 layers | — | gold #FAB625 **0.9265** · deep #A66003 0.8128 · white #FFFFFF 0.7991 |
+| Tagline (IMG-A) | 1 layer | **0.9081** | #D8921E |
+| Ornament (IMG-A) | 1 layer | **0.8809** | #784500 |
 
-Badge roundel cream: `#FEF5E3`/`#FEF6E3`. Panel A emblem interior samples:
-gold `#FFAF23`/`#FED441`, orange `#F44700`/`#FE8A12`, cream `#FEF8EA`,
-dark `#2C2F33`, warm gray `#D2C3B6`, light gold glow `#EFD08A`.
+## §13 small-size simplification (six families)
 
-## Text findings
+The 14 emblem layers consolidate into 6 families for ≤48 px renders:
 
-- **Only text on the board**: the tagline `TASTE • DISCOVER • PLAN • ENJOY`
-  (italic serif, ~13 px caps, cream) + unreadable 3 px swatch labels.
-- **No “CULINA” wordmark lettering exists anywhere on the board** (checked
-  light-on-dark and dark-on-light, glyph-size component sweep of full board).
-  The brand name is presented only through the emblem/monogram.
-- Consequence (documented in BRAND-ASSET-MANIFEST): `culina-wordmark.svg`
-  letterforms are **constructed** vector paths in the board’s typographic
-  language (high-contrast italic serif, matching tagline glyph proportions),
-  not traced from board lettering — because none exists. Tagline in the lockup
-  uses the same constructed letterforms.
+| Family | Absorbs | Area (source px) | Layer IoU |
+|---|---|---|---|
+| `#F7B728` gold | F6A815, FACB31, FBE25F, FCEE96 | 379,378 | 0.8913 |
+| `#DC7307` orange | E17C08, B15907 | 211,567 | 0.8513 |
+| `#DE2A05` crimson | E61F03, 8C2303 | 219,640 | 0.8424 |
+| `#567F06` green | 437503, 83B50B | 207,401 | 0.8625 |
+| `#F6F0E7` white/cream | FBF9F3, EEE4D2 | 328,182 | 0.9252 |
+| `#C9AF92` tan | D2BBA4, B49069 | 111,023 | 0.9433 |
 
-## v1.1.0 correction (historical)
+Size tiers: ≥64 px full 14-layer geometry · 48 px simple+thr 0 · 32 px
+simple+thr 4000 · 16 px simple+thr 12000 · tile/favicon simple min-area 700
+with crimson+green forced (they carry identity at 16 px).
 
-The v1.1.0 “mark region” assumption (x190–485 y160–450) pointed at the hero
-illustration / photographic texture, not an emblem. v1.1.0’s mark was a spec
-reconstruction; it is superseded by the traced artwork in this release and
-archived under `assets/brand/archive/`.
+## Grounds
 
-## Emblem character (corrected during tracing — important)
+The board paints the emblem directly on transparent/midnight grounds; the app
+icon presentation (from the board's own usage) places the emblem on a
+**Midnight #0B0F19 square** — matching the site's Midnight theme token.
+`§26` palette tokens are unchanged by v1.3.0 (Ember Gold, Spicy Orange,
+Fresh Green, Deep Crimson, Midnight, Cream); the traced layers are source
+sampling, the tokens remain the spec.
 
-Measured composition of the Panel A interior (6× extraction, k-means): **61%
-cream, ~23% colored elements, ~16% thin dark web**. The emblem is *not*
-painted on a solid dark plate — it is **delicate linework, gold/orange masses
-and a thin dark web painted directly on the shared cream badge surface**
-(an earlier reading of "dark ground with colored emblem" was wrong; the
-apparent darkness in coarse ASCII maps was mid-tone glow, mostly light-gold).
-Consequences implemented in v1.2.0:
+## Precedence
 
-- `culina-emblem.svg` = traced layers on the cream squircle tile (the tile is
-  the ground, exactly as the board paints it).
-- `culina-mark.svg` = the Panel B **monogram** (bold, flat, transparent) — the
-  canonical mark; the Panel A emblem is the illustrative presentation.
-- Logo lockups = cream badge + emblem layers; OG card = emblem on its tile.
-
-## Typography verification (measured)
-
-Per-glyph aligned IoU of the board's painted tagline capitals vs candidate
-italic serifs at native cap height: Playfair Display 400–700i ≈ 0.32–0.36,
-Libre Bodoni 400–700i ≈ 0.40–0.44, EB Garamond ≈ 0.38–0.39, Cormorant
-Garamond ≈ 0.41–0.46. **No exact typeface match** — the board's lettering is
-a painted approximation. Production typography (wordmark, lockup tagline,
-OG card) uses **Playfair Display Italic** (the declared display font) as true
-font outlines via fontTools — documented derivation, not a trace.
-
-## Vectorization strategy (as built, v1.2.0)
-
-- **Panel B monogram** → `culina-mark` family: threshold → skimage
-  find_contours → scipy B-spline → Douglas-Peucker → cubic Bézier paths.
-  IoU vs source mask: 0.969 combined (0.966 dark / 0.746 sprigs — the sage
-  sprigs are small painted marks; kept at ≥200 px area, token-mapped to
-  Fresh Green). Chromium render of the final SVG vs the board crop
-  silhouette: IoU 0.921.
-- **Panel A emblem** → `culina-emblem`: 16-cluster seeded k-means →
-  per-layer contour tracing. Union IoU 0.918. Palette is the artwork's own
-  quantized colors (documented simplification: painterly shading → 16 flat
-  fills).
-- **Hero** → reference + raster master (3× LANCZOS).
-- **Raster masters**: Panel A 4×, Panel B 4×, hero 3× — the §3
-  “high-resolution raster master” branch (no invented detail).
-- **Wordmark/lockup**: Playfair Display Italic outlines (see above).
+1. These two files are the absolute source of truth for the mark and wordmark.
+2. `design-system/culina/` rules still govern typography/spacing in-product;
+   where its type identity conflicts with the artwork, the artwork wins.
+3. The v1.2.0 board (`assets/brand/archive/v1.2.0/source/`) is historical.

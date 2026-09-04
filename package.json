@@ -1,6 +1,6 @@
 {
   "name": "culina",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "CULINA — The Interactive Food Intelligence & Discovery Platform. Discover food. Understand it. Make it yours.",
   "private": true,
   "type": "module",

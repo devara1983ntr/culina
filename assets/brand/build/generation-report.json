@@ -1,6 +1,7 @@
 {
  "vector": [
   "culina-emblem.svg",
+  "culina-icon.svg",
   "culina-lockup-light.svg",
   "culina-lockup.svg",
   "culina-logo-dark.svg",
@@ -10,49 +11,43 @@
   "culina-mark-light.svg",
   "culina-mark-tile.svg",
   "culina-mark.svg",
-  "culina-monogram-cream.svg",
-  "culina-monogram.svg",
-  "culina-wordmark-midnight.svg",
+  "culina-wordmark-light.svg",
   "culina-wordmark.svg"
  ],
- "raster_targets": 48,
+ "raster_targets": 50,
  "trace_iou": {
-  "monogram": {
-   "dark": 0.9658882388921127,
-   "green": 0.7459975019870557,
-   "combined": 0.9690449114619486
+  "emblem_union": 0.9084,
+  "emblem_layers": {
+   "#FBF9F3": 0.9484,
+   "#F6A815": 0.9147,
+   "#FACB31": 0.9187,
+   "#E17C08": 0.9044,
+   "#437503": 0.8552,
+   "#FBE25F": 0.9335,
+   "#E61F03": 0.9019,
+   "#8C2303": 0.8636,
+   "#EEE4D2": 0.9386,
+   "#D2BBA4": 0.9518,
+   "#83B50B": 0.862,
+   "#B15907": 0.8437,
+   "#B49069": 0.9124,
+   "#FCEE96": 0.8794
   },
-  "emblem": {
-   "elements": 0.9076,
-   "full": 0.9177,
-   "ground": 0.9098,
-   "per_layer": {
-    "9": 0.9616,
-    "0": 0.8812,
-    "dark": 0.847,
-    "4": 0.7907,
-    "6": 0.8003,
-    "5": 0.8741,
-    "3": 0.7937,
-    "1": 0.8041,
-    "7": 0.6498,
-    "10": 0.7361,
-    "8": 0.7248,
-    "12": 0.5736,
-    "15": 0.6661,
-    "13": 0.6518,
-    "14": 0.6474,
-    "2": 0.6518,
-    "11": 0.7053
-   }
-  }
+  "wordmark": {
+   "gold": 0.9265,
+   "deep": 0.8128,
+   "white": 0.7991
+  },
+  "tagline": 0.9081,
+  "ornament": 0.8809
+ },
+ "sources": {
+  "emblem": "assets/brand/source/culina-emblem-master.png",
+  "wordmark_tagline": "assets/brand/source/culina-logo-board.png"
  },
  "tokens": {
-  "gold": "#FFB703",
-  "orange": "#FB5607",
-  "green": "#2ECC71",
-  "crimson": "#E63946",
   "midnight": "#0B0F19",
-  "cream": "#FFF7E6"
+  "cream": "#FFF7E6",
+  "gold": "#FFB703"
  }
 }

@@ -234,4 +234,4 @@ Before delivering any UI code, verify:
 - [ ] No content hidden behind fixed navbars
 - [ ] No horizontal scroll on mobile
 
-> **Identity update (v1.1.0):** the approved brand board (`docs/brand/culina-brand-board.png`) is the visual source of truth — Ember Gold `#FFB703`, Spicy Orange `#FB5607`, Fresh Green `#2ECC71`, Deep Crimson `#E63946`, Midnight `#0B0F19`, Cream `#FFF7E6`; Playfair Display + Inter. Semantic token mapping with AA-verified shade derivations: `css/tokens.css` + `scripts/verify-contrast.py` (see `docs/DESIGN-DECISIONS.md` §21).
+> **Identity update (v1.3.0):** the supplied originals (`assets/brand/source/culina-logo-board.png` + `culina-emblem-master.png`) are the visual source of truth — Ember Gold `#FFB703`, Spicy Orange `#FB5607`, Fresh Green `#2ECC71`, Deep Crimson `#E63946`, Midnight `#0B0F19`, Cream `#FFF7E6`; Playfair Display + Inter. Semantic token mapping with AA-verified shade derivations: `css/tokens.css` + `scripts/verify-contrast.py` (see `docs/DESIGN-DECISIONS.md` §21).

@@ -19,11 +19,18 @@ from scipy import ndimage
 from scipy.interpolate import splprep, splev
 from skimage import measure
 
-BOARD = "/home/user/culina/docs/brand/culina-brand-board.png"
+ROOT = "/home/user/culina"
+SRC_LOGO_BOARD = ROOT + "/assets/brand/source/culina-logo-board.png"       # full logo presentation
+SRC_EMBLEM_MASTER = ROOT + "/assets/brand/source/culina-emblem-master.png"  # standalone emblem
 
 
 def load_board() -> Image.Image:
-    return Image.open(BOARD).convert("RGB")
+    """Back-compat alias — loads the current approved logo board."""
+    return Image.open(SRC_LOGO_BOARD).convert("RGB")
+
+
+def load_image(path: str) -> Image.Image:
+    return Image.open(path).convert("RGB")
 
 
 def extract(im: Image.Image, x0, y0, x1, y1, scale=4) -> Image.Image:
@@ -137,7 +144,7 @@ def polyline_to_bezier_path(pts, offset=(0.0, 0.0), scale=1.0):
     n = len(p) - 1  # last == first
     if n < 3:
         return ""
-    d = [f"M {p[0,0]:.1f} {p[0,1]:.1f}"]
+    d = [f"M {round(p[0,0])} {round(p[0,1])}"]
     for i in range(n):
         p0 = p[(i - 1) % n]
         p1 = p[i]
@@ -146,7 +153,7 @@ def polyline_to_bezier_path(pts, offset=(0.0, 0.0), scale=1.0):
         c1 = p1 + (p2 - p0) / 6.0
         c2 = p2 - (p3 - p1) / 6.0
         d.append(
-            f"C {c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {p2[0]:.1f} {p2[1]:.1f}"
+            f"C {round(c1[0])} {round(c1[1])} {round(c2[0])} {round(c2[1])} {round(p2[0])} {round(p2[1])}"
         )
     d.append("Z")
     return " ".join(d)

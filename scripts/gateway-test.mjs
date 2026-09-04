@@ -161,6 +161,7 @@ try {
     const ct = res.headers['content-type'] || '';
     assert(res.status === 200 && ct.includes('svg'), `/brand/${name} served as SVG`);
     const body = res.body.trim();
+    assert(!body.includes('<image'), `/brand/${name} embeds no raster (traced vectors only)`);
     assert(body.startsWith('<svg') && body.includes('viewBox=') && body.endsWith('</svg>'),
       `/brand/${name} is a valid standalone SVG (viewBox + single root)`);
     const assets = readFileSync(join(vectorDir, name), 'utf8');
@@ -191,7 +192,7 @@ try {
     ['/icons/icon-maskable-192.png', 192, 192], ['/icons/icon-maskable-512.png', 512, 512],
     ['/icons/apple-touch-icon.png', 180, 180],
     ['/social/og-image.png', 1200, 630], ['/social/twitter-card.png', 1200, 628],
-    ['/brand/culina-logo-dark.png', 512, 185], ['/brand/culina-logo-light.png', 512, 185],
+    ['/brand/culina-logo-dark.png', 512, 456], ['/brand/culina-logo-light.png', 512, 426],
   ];
   for (const [p, w, h] of pngAssets) {
     const res = await fetchBuffer(p);
@@ -223,10 +224,13 @@ try {
     assert(pngSize(buf).w === s && pngSize(buf).h === s, `culina-icon-${s}.png is ${s}×${s}`);
   }
 
-  /* the in-app mark module embeds the canonical tile */
-  const tileSvg = readFileSync(join(ROOT, 'assets/brand/vector/culina-mark-tile.svg'), 'utf8').trim();
+  /* the in-app mark module embeds the canonical tile geometry */
+  const tileSvg = readFileSync(join(ROOT, 'assets/brand/vector/culina-mark-tile.svg'), 'utf8');
   const markModule = readFileSync(join(ROOT, 'js/components/mark-tile.js'), 'utf8');
-  assert(markModule.includes(tileSvg), 'js/components/mark-tile.js embeds the canonical tile');
+  const tilePaths = [...tileSvg.matchAll(/ d="M [^"]+"/g)].map((m) => m[0]);
+  assert(tilePaths.length >= 5, 'canonical tile carries traced paths');
+  assert(tilePaths.every((d) => markModule.includes(d)),
+    'js/components/mark-tile.js embeds every canonical tile path');
 
   /* manifest carries the real brand icons + colors */
   const mf = JSON.parse((await fetchRaw('/manifest.webmanifest')).body);
