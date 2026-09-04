@@ -45,14 +45,17 @@ const fixedRobots = robots.replace(/^Sitemap:.*$/m, `Sitemap: ${base}/sitemap.xm
 writeFileSync(robotsPath, fixedRobots);
 
 const shell = readFileSync(shellPath, 'utf8');
+// Social images + canonical: the build emits them base-prefixed but
+// path-relative (e.g. "/culina/social/og-image.png"); resolve against the
+// public origin so the result is absolute exactly once.
+const absolutize = (attr, key) => (m, a, z) => {
+  const value = m.match(new RegExp(`${key}="([^"]*)"`))[1];
+  return `${a}${new URL(value, base + '/').toString()}${z}`;
+};
 const fixedShell = shell
-  .replace(/(property="og:image" content=")(?!https?:)/g, `$1${base}`)
-  .replace(/(name="twitter:image" content=")(?!https?:)/g, `$1${base}`)
-  // canonical (vite emits it base-prefixed but path-relative)
-  .replace(/(<link rel="canonical" href=")(?!https?:)[^"]*(")/, (m, a, z) => {
-    const path = m.match(/href="([^"]*)"/)[1];
-    return `${a}${new URL(path, base + '/').toString()}${z}`;
-  });
+  .replace(/(property="og:image" content=")(?!https?:)[^"]*(")/, absolutize('', 'content'))
+  .replace(/(name="twitter:image" content=")(?!https?:)[^"]*(")/, absolutize('', 'content'))
+  .replace(/(<link rel="canonical" href=")(?!https?:)[^"]*(")/, absolutize('', 'href'));
 writeFileSync(shellPath, fixedShell);
 
 console.log(`set-origin: ${base} — ${locCount} sitemap URLs absolute, robots Sitemap + social images absolute`);
