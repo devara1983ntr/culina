@@ -1,21 +1,24 @@
 /* ==========================================================================
    CULINA — Design tokens
-   Generated from the UI/UX Pro Max skill design system (design-system/culina/MASTER.md)
-   with a warm editorial palette adaptation — see docs/DESIGN-DECISIONS.md.
+   Approved brand identity (docs/brand/culina-brand-board.png):
+     Ember Gold #FFB703 · Spicy Orange #FB5607 · Fresh Green #2ECC71
+     Deep Crimson #E63946 · Midnight #0B0F19 · Cream #FFF7E6
+     Playfair Display (display) + Inter (UI/body), self-hosted @fontsource (OFL)
+   Deepened/lightened shades of brand hues are used ONLY where WCAG 2.2 AA
+   contrast requires them — every pairing is verified by
+   scripts/verify-contrast.py (see docs/DESIGN-DECISIONS.md §21).
 
    Architecture: primitive scale → semantic tokens → components.
-   Semantic color names follow the skill's token architecture
-   (--color-primary / on-primary / background / card / muted / border / ring).
    ========================================================================== */
 
 :root {
   /* ---------------------------------------------------------------------
      Typography
-     Libre Bodoni (editorial display serif) + Public Sans (UI/body sans).
+     Playfair Display (culinary editorial display serif) + Inter (UI/body).
      Self-hosted via @fontsource — properly licensed (OFL).
      --------------------------------------------------------------------- */
-  --font-display: 'Libre Bodoni', 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
-  --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Playfair Display', 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', monospace;
 
   --text-xs: 0.75rem;
@@ -69,10 +72,10 @@
   /* ---------------------------------------------------------------------
      Elevation — subtle, warm-tinted (skill: flat design, no heavy shadows)
      --------------------------------------------------------------------- */
-  --shadow-sm: 0 1px 2px rgba(46, 26, 12, 0.06), 0 1px 3px rgba(46, 26, 12, 0.05);
-  --shadow-md: 0 2px 6px rgba(46, 26, 12, 0.07), 0 4px 14px rgba(46, 26, 12, 0.06);
-  --shadow-lg: 0 6px 18px rgba(46, 26, 12, 0.09), 0 14px 40px rgba(46, 26, 12, 0.1);
-  --shadow-card-hover: 0 4px 10px rgba(46, 26, 12, 0.08), 0 12px 32px rgba(46, 26, 12, 0.1);
+  --shadow-sm: 0 1px 2px rgba(11, 15, 25, 0.06), 0 1px 3px rgba(11, 15, 25, 0.05);
+  --shadow-md: 0 2px 6px rgba(11, 15, 25, 0.07), 0 4px 14px rgba(11, 15, 25, 0.06);
+  --shadow-lg: 0 6px 18px rgba(11, 15, 25, 0.09), 0 14px 40px rgba(11, 15, 25, 0.1);
+  --shadow-card-hover: 0 4px 10px rgba(11, 15, 25, 0.08), 0 12px 32px rgba(11, 15, 25, 0.1);
 
   /* ---------------------------------------------------------------------
      Motion (PRD §8: fast / standard / emphasized)
@@ -119,96 +122,103 @@
 [data-theme='light'] {
   color-scheme: light;
 
-  --color-background: #faf7f2;
-  --color-background-subtle: #f3ede2;
-  --color-surface: #ffffff;
-  --color-surface-2: #f7f1e8;
-  --color-surface-elevated: #ffffff;
+  /* Cream ground (brand board) with Midnight ink */
+  --color-background: #fff7e6;
+  --color-background-subtle: #f8efda;
+  --color-surface: #fffdf7;
+  --color-surface-2: #faf2e1;
+  --color-surface-elevated: #fffdf7;
 
-  --color-text: #221b14;
-  --color-text-secondary: #4c4237;
-  --color-text-muted: #6d6053; /* ≥ 4.5:1 on --color-background */
+  --color-text: #0b0f19;
+  --color-text-secondary: #443a28;
+  --color-text-muted: #5d5140; /* 7.25:1 on --color-background */
 
-  --color-border: #e7dfd2;
-  --color-border-strong: #d6c9b6;
+  --color-border: #ebdfc6;
+  --color-border-strong: #dcca8;
 
-  --color-primary: #b8431a;
-  --color-on-primary: #fff8f2;
-  --color-primary-strong: #93340f;
-  --color-primary-soft: #f9e8dc;
-  --color-primary-hover: #a13a15;
+  /* Deepened Spicy Orange: 4.86:1 as text on Cream and as button ground
+     with Cream label — the vivid board orange lives in the mark and the
+     dark theme (verified by scripts/verify-contrast.py). */
+  --color-primary: #c2410c;
+  --color-on-primary: #fff7e6;
+  --color-primary-strong: #9a3412;
+  --color-primary-soft: #fbe9dc;
+  --color-primary-hover: #a83a0b;
 
-  --color-accent: #b8431a;
-  --color-accent-soft: #f9e8dc;
+  --color-accent: #c2410c;
+  --color-accent-soft: #fbe9dc;
 
-  --color-success: #1e6f45;
-  --color-success-soft: #e2f1e6;
-  --color-warning: #8a5a0b;
-  --color-warning-soft: #f8eed7;
-  --color-danger: #b3261e;
-  --color-danger-soft: #f9e3e0;
-  --color-info: #33597e;
-  --color-info-soft: #e5edf5;
+  --color-success: #1e7a45; /* deepened Fresh Green — 5.02:1 */
+  --color-success-soft: #e3f3e9;
+  --color-warning: #8a6400; /* deepened Ember Gold — 5.05:1 */
+  --color-warning-soft: #f9efd7;
+  --color-danger: #b3241e; /* deepened Deep Crimson — 6.18:1 */
+  --color-danger-soft: #fae4e1;
+  --color-info: #2f4b72; /* slate derived from Midnight's hue — 8.31:1 */
+  --color-info-soft: #e7edf5;
 
-  --color-focus: #b8431a;
-  --color-ring: rgba(184, 67, 26, 0.35);
+  --color-focus: #c2410c;
+  --color-ring: rgba(194, 65, 12, 0.35);
 
-  --color-scrim: rgba(28, 18, 10, 0.5);
-  --color-overlay: rgba(250, 247, 242, 0.86);
+  --color-scrim: rgba(11, 15, 25, 0.5);
+  --color-overlay: rgba(255, 247, 230, 0.86);
 
-  --header-bg: rgba(250, 247, 242, 0.88);
-  --skeleton-base: #eee6d9;
+  --header-bg: rgba(255, 247, 230, 0.88);
+  --skeleton-base: #f1e6ce;
   --skeleton-shine: rgba(255, 255, 255, 0.75);
-  --code-bg: #f1eadd;
+  --code-bg: #f6eddc;
 }
 
 /* ==========================================================================
-   Semantic color tokens — DARK (warm espresso)
+   Semantic color tokens — DARK (Midnight, brand board)
    ========================================================================== */
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --color-background: #14100c;
-  --color-background-subtle: #1a1510;
-  --color-surface: #1e1913;
-  --color-surface-2: #262019;
-  --color-surface-elevated: #241f18;
+  /* Midnight ground (brand board) with Cream ink; vivid brand hues are
+     AA-safe on Midnight, so the dark theme carries the board's colours. */
+  --color-background: #0b0f19;
+  --color-background-subtle: #101624;
+  --color-surface: #141b2c;
+  --color-surface-2: #1a2236;
+  --color-surface-elevated: #182032;
 
-  --color-text: #f2eae0;
-  --color-text-secondary: #cfc2b2;
-  --color-text-muted: #a99b8a; /* ≥ 4.5:1 on --color-background */
+  --color-text: #fff7e6;
+  --color-text-secondary: #d9d2c0;
+  --color-text-muted: #a89f8c; /* 7.30:1 on --color-background */
 
-  --color-border: #2e2720;
-  --color-border-strong: #3d342a;
+  --color-border: #262f45;
+  --color-border-strong: #37415c;
 
-  --color-primary: #f0743c;
-  --color-on-primary: #231006;
-  --color-primary-strong: #f79468;
-  --color-primary-soft: rgba(240, 116, 60, 0.14);
-  --color-primary-hover: #f8874f;
+  --color-primary: #ffb703; /* Ember Gold — 10.97:1 as text and as button
+     ground with Midnight label */
+  --color-on-primary: #0b0f19;
+  --color-primary-strong: #ffc733;
+  --color-primary-soft: rgba(255, 183, 3, 0.14);
+  --color-primary-hover: #ffc94d;
 
-  --color-accent: #f0743c;
-  --color-accent-soft: rgba(240, 116, 60, 0.14);
+  --color-accent: #fb5607; /* Spicy Orange — 5.87:1 */
+  --color-accent-soft: rgba(251, 86, 7, 0.15);
 
-  --color-success: #62c78f;
-  --color-success-soft: rgba(98, 199, 143, 0.13);
-  --color-warning: #dcaf56;
-  --color-warning-soft: rgba(220, 175, 86, 0.13);
-  --color-danger: #ea8073;
-  --color-danger-soft: rgba(234, 128, 115, 0.13);
-  --color-info: #8ab4d9;
-  --color-info-soft: rgba(138, 180, 217, 0.12);
+  --color-success: #2ecc71; /* Fresh Green — 9.11:1 */
+  --color-success-soft: rgba(46, 204, 113, 0.13);
+  --color-warning: #ffd268; /* lightened Ember Gold — 13.38:1 */
+  --color-warning-soft: rgba(255, 210, 104, 0.13);
+  --color-danger: #ff6b77; /* lightened Deep Crimson — 6.95:1 */
+  --color-danger-soft: rgba(255, 107, 119, 0.13);
+  --color-info: #9db8e8;
+  --color-info-soft: rgba(157, 184, 232, 0.12);
 
-  --color-focus: #f0743c;
-  --color-ring: rgba(240, 116, 60, 0.45);
+  --color-focus: #ffb703;
+  --color-ring: rgba(255, 183, 3, 0.45);
 
-  --color-scrim: rgba(5, 3, 1, 0.66);
-  --color-overlay: rgba(20, 16, 12, 0.9);
+  --color-scrim: rgba(2, 4, 10, 0.7);
+  --color-overlay: rgba(11, 15, 25, 0.9);
 
-  --header-bg: rgba(20, 16, 12, 0.88);
-  --skeleton-base: #241f18;
+  --header-bg: rgba(11, 15, 25, 0.88);
+  --skeleton-base: #182032;
   --skeleton-shine: rgba(255, 255, 255, 0.06);
-  --code-bg: #262019;
+  --code-bg: #1a2236;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 4px 14px rgba(0, 0, 0, 0.3);

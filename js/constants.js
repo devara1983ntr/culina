@@ -5,9 +5,11 @@
 export const APP = {
   name: 'CULINA',
   tagline: 'Discover food. Understand it. Make it yours.',
+  brandTagline: 'TASTE • DISCOVER • PLAN • ENJOY',
   supportingCopy: 'Recipes, ingredients, nutrition and drinks — intelligently connected.',
-  version: '1.0.0',
-  repoUrl: 'https://github.com/nextlevelbuilder/ui-ux-pro-max-skill', // design skill source
+  version: '1.1.0',
+  repoUrl: 'https://github.com/devara1983ntr/culina',
+  developerCredit: 'Designed & developed by Roshan',
 };
 
 export const STORAGE_KEYS = {

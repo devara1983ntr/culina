@@ -1,3 +1,5 @@
+import { basePath } from './router.js';
+
 /**
  * CULINA — Per-route SEO metadata (PRD §46).
  * Titles, descriptions, canonicals, Open Graph/Twitter and JSON-LD are
@@ -59,7 +61,8 @@ export function applyMeta(meta = {}) {
   );
 
   const path = meta.path || window.location.pathname + window.location.search;
-  const canonicalUrl = new URL(path, window.location.origin).toString();
+  const base = basePath();
+  const canonicalUrl = new URL((meta.path && path.startsWith('/') ? base + path : path), window.location.origin).toString();
   let canonical = document.head.querySelector('link[rel="canonical"]');
   if (!canonical) {
     canonical = document.createElement('link');
@@ -77,9 +80,19 @@ export function applyMeta(meta = {}) {
   }
   ogUrl.setAttribute('content', canonicalUrl);
 
-  if (meta.ogImage) {
-    upsertMeta('meta[property="og:image"]', 'property', 'og:image', meta.ogImage);
-  }
+  // Open Graph / Twitter card image: route image when available, otherwise
+  // the brand social card. Always absolutized — the OG spec requires it.
+  const ogImage = new URL(meta.ogImage || '/social/og-image.png', window.location.origin).toString();
+  upsertMeta('meta[property="og:image"]', 'property', 'og:image', ogImage);
+  upsertMeta('meta[property="og:image:width"]', 'property', 'og:image:width', meta.ogImage ? undefined : '1200');
+  upsertMeta('meta[property="og:image:height"]', 'property', 'og:image:height', meta.ogImage ? undefined : '630');
+  upsertMeta(
+    'meta[name="twitter:image"]',
+    'name',
+    'twitter:image',
+    new URL(meta.ogImage || '/social/twitter-card.png', window.location.origin).toString(),
+  );
+  upsertMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image');
 
   setJsonLd(meta.jsonLd ?? null);
 }

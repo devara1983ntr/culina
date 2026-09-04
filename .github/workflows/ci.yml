@@ -88,7 +88,7 @@ jobs:
           done
           curl -sf http://localhost:3000/healthz
 
-      - name: Run browser E2E (82 checks)
+      - name: Run browser E2E (92 checks)
         env:
           CULINA_QA_ENGINE: ${{ matrix.engine }}
           CULINA_QA_EXECUTABLE: ${{ steps.browser.outputs.executable }}

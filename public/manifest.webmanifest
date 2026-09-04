@@ -2,29 +2,36 @@
   "name": "CULINA — Food Intelligence & Discovery",
   "short_name": "CULINA",
   "description": "Discover food. Understand it. Make it yours. Recipes, ingredients, nutrition and drinks — intelligently connected.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#faf7f2",
-  "theme_color": "#faf7f2",
+  "background_color": "#fff7e6",
+  "theme_color": "#0b0f19",
+  "id": "./",
   "categories": ["food", "lifestyle", "shopping"],
   "lang": "en",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "./icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-maskable-512.png",
+      "src": "./icons/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -35,19 +42,19 @@
       "name": "Search",
       "short_name": "Search",
       "description": "Search across every data source",
-      "url": "/search"
+      "url": "./search"
     },
     {
       "name": "Meal planner",
       "short_name": "Planner",
       "description": "Plan your week",
-      "url": "/planner"
+      "url": "./planner"
     },
     {
       "name": "Surprise me",
       "short_name": "Surprise",
       "description": "A random discovery",
-      "url": "/?surprise=1"
+      "url": "./?surprise=1"
     }
   ]
 }

@@ -100,3 +100,16 @@ Shared content components own their heading level: **card titles, hub tiles, sta
 ## 20. Service-worker registration must not race `load`
 
 Registration originally attached a `window.addEventListener('load', …)` from inside `boot().then()`. On a fast load with slow provider data, `load` fires first and the listener is never called — silently losing offline support for that visit. The registration now lives at module scope with a `document.readyState === 'complete'` guard. The bug was invisible until the E2E suite ran with raster images blocked (fast `load`) and found zero registrations; it is exactly the kind of race the QA environment should be tuned to expose.
+
+
+## 21. The approved brand board is the visual source of truth (v1.1.0)
+
+The product's first identity ("open-ring plate", espresso/ember palette, Libre Bodoni + Public Sans) was a placeholder system generated before the approved brand board existed. As of 1.1.0 the board (`docs/brand/culina-brand-board.png`) supersedes it:
+
+- **Palette mapping.** Brand primitives (Ember Gold `#FFB703`, Spicy Orange `#FB5607`, Fresh Green `#2ECC71`, Deep Crimson `#E63946`, Midnight `#0B0F19`, Cream `#FFF7E6`) map to the existing semantic token names, values only — components were untouched. The **dark theme carries the board's vivid hues directly** (all AA on Midnight), while the **light theme uses deepened shades of the same hues** (deep orange `#C2410C`, deep green `#1E7A45`, deep gold `#8A6400`, deep crimson `#B3241E`) because the vivid values cannot pass 4.5:1 as text on Cream. Every critical pairing is computed and asserted by `scripts/verify-contrast.py` (17.96:1 body text, 4.86–6.18:1 semantic text, 10.97:1 gold-on-Midnight buttons, 5.09/9.83:1 focus indicators).
+- **Borders are decorative separators** (subtle by intent, ~1.5–1.9:1); WCAG 1.4.11 state information is carried by the ≥3:1 focus ring, labels and text — the same interpretation the shipped accessibility audits used.
+- **Typography.** Playfair Display (display) + Inter (UI/body) via Fontsource, same weights as before (400/500/600/700 + display italic; Inter 300–700).
+- **The mark is generated, never hand-copied.** One geometry source (`scripts/generate-brand-assets.py`) emits the SVG assets, the favicon/PWA/social rasters (via `scripts/rasterize-brand.mjs`) and `js/components/mark-tile.js` (the in-app module). The gateway test asserts the mirrors are byte-identical, so drift is structurally impossible.
+- **The mark always sits on its Midnight tile.** Cream/gold/green/crimson elements of the mark are invisible on a Cream ground, so the tiled form is the only in-app variant — matching how the board itself presents the mark.
+- **Tagline usage.** `TASTE • DISCOVER • PLAN • ENJOY` (board tagline) appears in the footer, About page and lockup assets; `Discover food. Understand it. Make it yours.` remains the product descriptor (title/OG/README).
+- **Honest limitation:** the emblem is reconstructed from the board's written specification and a programmatic palette/layout analysis of the image (this environment has no human visual review of the board); it is a faithful rendering of the specified elements, not a pixel trace. The geometry is generated code in the repository, so any fine-tuning is a one-file change.

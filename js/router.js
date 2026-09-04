@@ -41,6 +41,21 @@ export const routes = [
   { path: '/offline', page: 'offline' },
 ];
 
+/**
+ * Deployment base path (e.g. '/culina' on a sub-path host such as GitHub
+ * Pages project sites; '' at a domain root). Derived from the manifest link,
+ * which the build rewrites to the deployed root for every base.
+ */
+export function basePath() {
+  const manifest = document.querySelector('link[rel="manifest"]')?.getAttribute('href') || '/';
+  try {
+    const dir = new URL(manifest, location.origin).pathname.replace(/[^/]*$/, '');
+    return dir.replace(/\/+$/, '');
+  } catch {
+    return '';
+  }
+}
+
 const compiled = routes.map((route) => ({
   ...route,
   regex: new RegExp(`^${route.path.replace(/:[^/]+/g, (name) => `(?<${name.slice(1)}>[^/]+)`)}$`),
@@ -55,9 +70,17 @@ export function matchRoute(pathname) {
   return null;
 }
 
+/** Strip the deployment base from a full pathname ('/culina/recipes' → '/recipes'). */
+function stripBase(pathname) {
+  const base = basePath();
+  if (base && pathname.startsWith(base + '/')) return pathname.slice(base.length) || '/';
+  if (base && pathname === base) return '/';
+  return pathname;
+}
+
 export function currentRoute() {
   const { pathname, search } = window.location;
-  const matched = matchRoute(pathname);
+  const matched = matchRoute(stripBase(pathname));
   const query = Object.fromEntries(new URLSearchParams(search));
   return {
     page: matched ? matched.page : 'not-found',
@@ -69,8 +92,9 @@ export function currentRoute() {
 
 export function navigate(to, { replace = false } = {}) {
   const target = to.startsWith('/') ? to : new URL(to, location.origin).pathname + location.search;
-  if (replace) history.replaceState({}, '', target);
-  else history.pushState({}, '', target);
+  const url = basePath() + target; // app-internal paths are always base-relative
+  if (replace) history.replaceState({}, '', url);
+  else history.pushState({}, '', url);
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
 
@@ -89,6 +113,6 @@ export function installLinkInterception() {
     if (href.startsWith('//')) return; // protocol-relative external
 
     event.preventDefault();
-    navigate(href);
+    navigate(href); // navigate() applies the deployment base
   });
 }

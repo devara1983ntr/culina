@@ -44,7 +44,7 @@ function apply(settings) {
   document.documentElement.dataset.textSize = settings.largerText ? 'large' : 'standard';
   // Both media-qualified theme-color metas are set to the applied color so
   // manual overrides win regardless of which one the browser picks.
-  const color = applied === 'dark' ? '#14100c' : '#faf7f2';
+  const color = applied === 'dark' ? '#0b0f19' : '#fff7e6';
   document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute('content', color));
   appState.set({ theme: applied, settingsVersion: (appState.get().settingsVersion || 0) + 1 });
 }

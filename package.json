@@ -1,7 +1,7 @@
 {
   "name": "culina",
   "version": "1.0.0",
-  "description": "CULINA \u2014 The Interactive Food Intelligence & Discovery Platform. Discover food. Understand it. Make it yours.",
+  "description": "CULINA — The Interactive Food Intelligence & Discovery Platform. Discover food. Understand it. Make it yours.",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -15,13 +15,14 @@
     "test:ui": "node scripts/run-qa.mjs"
   },
   "dependencies": {
-    "@fontsource/libre-bodoni": "^5.3.0",
-    "@fontsource/public-sans": "^5.3.0",
+    "@fontsource/inter": "^5.0.0",
+    "@fontsource/playfair-display": "^5.0.0",
     "lucide": "^1.39.0",
     "motion": "^13.2.0",
     "sortablejs": "^1.15.7"
   },
   "devDependencies": {
+    "playwright-core": "^1.62.1",
     "vite": "^6.3.5"
   }
 }

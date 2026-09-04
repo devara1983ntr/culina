@@ -18,6 +18,7 @@
  *   H. Offline & failure injection
  *   I. Accessibility (landmarks, headings, focus, targets, contrast, alt)
  *   J. PWA offline shell + performance baseline
+ *   K. Brand identity & metadata (mark, fonts, favicons, social, credit)
  */
 import { chromium, firefox } from 'playwright-core';
 import sparticuz from '@sparticuz/chromium';
@@ -458,9 +459,10 @@ try {
   const skeletons = await p.locator('.skeleton').count();
   hasErrorState && skeletons === 0 ? pass('provider outage → graceful error state (no stuck skeletons)') : fail('provider outage', `errorUI=${hasErrorState} skeletons=${skeletons}`);
   await p.unroute(/themealdb\.com/);
-  // recovery
+  // recovery — real provider data must come back (30s: cold module boot +
+  // provider retries can exceed 15s on a loaded sandbox)
   await p.goto(BASE + '/recipes', { waitUntil: 'domcontentloaded' });
-  await p.waitForSelector('.card', { timeout: 15000 });
+  await p.waitForSelector('.card', { timeout: 30000 });
   pass('provider recovery after unroute');
   await ctx.close().catch(() => {});
 } catch (err) { fail('failure injection', err.message.split('\n')[0]); }
@@ -733,6 +735,105 @@ try {
     ? pass(`perf baseline: DCL ${perf.domContentLoaded}ms · load ${perf.load}ms · doc ${perf.transferKB}KB · ${perf.domNodes} DOM nodes`)
     : fail('perf baseline', JSON.stringify(perf));
 } catch (err) { await context.setOffline(false).catch(() => {}); fail('PWA/perf section', err.message.split('\n')[0]); }
+
+/* ---------------- K. Brand identity & metadata ---------------- */
+await ensureAlive();
+console.log('\nK) Brand identity & metadata');
+try {
+  // Section J re-arms the image block for the perf baseline; the brand asset
+  // checks below must reach the real files (pngs would be aborted otherwise).
+  await context.unroute(IMAGE_RE).catch(() => {});
+  await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#site-header .brand-lockup', { timeout: 10000 });
+  await page.waitForTimeout(600);
+
+  // 1. header lockup: tiled SVG mark + wordmark, display font applied
+  const lockup = await page.evaluate(() => {
+    const mark = document.querySelector('#site-header .brand-lockup .brand-mark');
+    const word = document.querySelector('#site-header .brand-word');
+    return {
+      isSvg: mark ? mark.tagName.toLowerCase() === 'svg' : false,
+      gradients: mark ? mark.querySelectorAll('linearGradient').length : 0,
+      word: word ? word.textContent.trim() : null,
+      font: word ? getComputedStyle(word).fontFamily : '',
+      bg: getComputedStyle(document.body).backgroundColor,
+    };
+  });
+  lockup.isSvg && lockup.gradients >= 2
+    ? pass('header renders the tiled C-mark (inline SVG, brand gradients)')
+    : fail('header mark', JSON.stringify(lockup));
+  lockup.word === 'CULINA' && /Playfair Display/.test(lockup.font)
+    ? pass('wordmark is CULINA in Playfair Display')
+    : fail('wordmark', JSON.stringify({ word: lockup.word, font: lockup.font }));
+  const LIGHT_BG = 'rgb(255, 247, 230)';
+  lockup.bg === LIGHT_BG
+    ? pass('Cream brand ground applied in light theme')
+    : fail('light ground', lockup.bg);
+
+  // 2. favicon + social meta wiring in the document head
+  const head = await page.evaluate(() => ({
+    svgIcon: !!document.querySelector('link[rel="icon"][type="image/svg+xml"]'),
+    pngIcons: ['16x16', '32x32', '64x64'].every((s) => document.querySelector(`link[rel="icon"][sizes="${s}"]`)),
+    apple: !!document.querySelector('link[rel="apple-touch-icon"]'),
+    ogImage: document.querySelector('meta[property="og:image"]')?.content || '',
+    twitterCard: document.querySelector('meta[name="twitter:card"]')?.content || '',
+    twitterImage: document.querySelector('meta[name="twitter:image"]')?.content || '',
+    splashImg: document.querySelector('#boot-splash img')?.getAttribute('src') || '',
+  }));
+  head.svgIcon && head.pngIcons && head.apple
+    ? pass('favicon set linked (SVG + 16/32/64 PNG + apple-touch)')
+    : fail('favicon links', JSON.stringify(head));
+  head.ogImage.startsWith('http') && head.twitterImage.startsWith('http') && head.twitterCard === 'summary_large_image'
+    ? pass('OG/Twitter card images absolute, large-image card')
+    : fail('social meta', JSON.stringify(head));
+  /culina-mark-tile\.svg$/.test(head.splashImg)
+    ? pass('boot splash uses the canonical brand tile')
+    : fail('splash asset', head.splashImg || 'no splash img');
+
+  // 3. brand assets + manifest icons resolve
+  const assetPaths = await page.evaluate(async () => {
+    const paths = [
+      '/brand/culina-mark-tile.svg', '/brand/culina-logo.svg', '/social/og-image.png',
+      '/social/twitter-card.png', '/icons/icon-512.png', '/icons/favicon.svg',
+    ];
+    const out = {};
+    for (const p of paths) out[p] = (await fetch(p, { cache: 'no-store' })).status;
+    return out;
+  });
+  Object.values(assetPaths).every((s) => s === 200)
+    ? pass('all brand/social assets resolve (200)')
+    : fail('brand assets', JSON.stringify(assetPaths));
+
+  const manifest = await page.evaluate(async () => {
+    const mf = await (await fetch('/manifest.webmanifest', { cache: 'no-store' })).json();
+    const iconStatuses = await Promise.all(mf.icons.map(async (i) => (await fetch(i.src, { cache: 'no-store' })).status));
+    return { theme: mf.theme_color, bg: mf.background_color, iconsOk: iconStatuses.every((s) => s === 200) };
+  });
+  manifest.theme === '#0b0f19' && manifest.bg === '#fff7e6' && manifest.iconsOk
+    ? pass('PWA manifest uses brand colors and all icons resolve')
+    : fail('manifest brand', JSON.stringify(manifest));
+
+  // 4. footer + about carry the approved tagline and developer credit
+  const footer = await page.evaluate(() => {
+    const f = document.querySelector('#site-footer');
+    const t = f?.querySelector('.footer-tagline')?.textContent.trim();
+    const credit = [...(f?.querySelectorAll('.footer-bottom span') || [])].map((n) => n.textContent).join(' ');
+    return { tagline: t, hasCredit: /Designed & developed by Roshan/.test(credit) };
+  });
+  footer.tagline === 'TASTE • DISCOVER • PLAN • ENJOY' && footer.hasCredit
+    ? pass('footer: brand tagline + developer credit')
+    : fail('footer brand', JSON.stringify(footer));
+
+  await page.goto(BASE + '/about', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.about-section', { timeout: 10000 });
+  const about = await page.evaluate(() => {
+    const t = document.querySelector('.brand-tagline')?.textContent.trim();
+    return { tagline: t, credit: document.body.textContent.includes('Designed & developed by Roshan') };
+  });
+  about.tagline === 'TASTE • DISCOVER • PLAN • ENJOY' && about.credit
+    ? pass('about page: brand tagline + developer credit')
+    : fail('about brand', JSON.stringify(about));
+} catch (err) { fail('brand section', err.message.split('\n')[0]); }
 
 await browser.close();
 

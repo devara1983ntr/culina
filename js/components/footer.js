@@ -22,6 +22,7 @@ export function renderFooter() {
         'div',
         { class: 'footer-brand' },
         BrandLogo({ href: '/', markSize: 22 }),
+        el('p', { class: 'footer-tagline' }, APP.brandTagline),
         el('p', {}, APP.supportingCopy + '. One search across verified food data sources — everything you save stays on your device.'),
       ),
       el(
@@ -85,7 +86,7 @@ export function renderFooter() {
       el(
         'div',
         { class: 'footer-bottom-inner' },
-        el('span', {}, `© ${new Date().getFullYear()} CULINA · v${APP.version}`),
+        el('span', {}, `© ${new Date().getFullYear()} CULINA · v${APP.version} · ${APP.developerCredit}`),
         el('span', {}, 'Aggregates third-party open data. Nutrition & product information is provided “as is” and is not dietary advice.'),
         el('span', {}, 'Local-first: favorites, plans & settings never leave your browser.'),
       ),

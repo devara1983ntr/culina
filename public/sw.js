@@ -6,12 +6,20 @@
  *   (never cached forever — food data changes).
  * - No credentials are ever cached (none exist).
  */
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const STATIC_CACHE = `culina-static-${VERSION}`;
 const DATA_CACHE = 'culina-data-v1';
-const OFFLINE_URL = '/offline.html';
 const DATA_TTL = 10 * 60 * 1000;
 const DATA_CACHE_MAX = 120;
+
+/* Deployment-agnostic base: URLs are resolved against the SW scope so the
+   same worker serves both a root deployment (gateway) and a sub-path
+   deployment (e.g. GitHub Pages project sites). */
+const SCOPE = new URL(self.registration.scope);
+const ROOT_URL = new URL('./', SCOPE).toString();
+const OFFLINE_URL = new URL('./offline.html', SCOPE).toString();
+const MANIFEST_URL = new URL('./manifest.webmanifest', SCOPE).toString();
+const FAVICON_URL = new URL('./favicon-64.png', SCOPE).toString();
 
 const API_HOSTS = [
   'themealdb.com',
@@ -26,7 +34,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(STATIC_CACHE);
-      await Promise.allSettled(['/', OFFLINE_URL, '/manifest.webmanifest', '/favicon-64.png'].map((url) => cache.add(url)));
+      await Promise.allSettled(
+        [ROOT_URL, OFFLINE_URL, MANIFEST_URL, FAVICON_URL].map((url) => cache.add(url)),
+      );
       await self.skipWaiting();
     })(),
   );
@@ -64,7 +74,7 @@ self.addEventListener('fetch', (event) => {
         } catch {
           const cachedPage = await caches.match(request);
           if (cachedPage) return cachedPage;
-          const shell = await caches.match('/');
+          const shell = await caches.match(ROOT_URL);
           if (shell) return shell;
           const offline = await caches.match(OFFLINE_URL);
           if (offline) return offline;

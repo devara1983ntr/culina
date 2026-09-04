@@ -51,6 +51,7 @@ export async function render(ctx) {
       { class: 'about-section' },
       el('p', { class: 'overline' }, icon('sparkles'), 'The product'),
       el('h1', {}, 'One coherent food experience'),
+      el('p', { class: 'brand-tagline', 'aria-label': `${APP.name} tagline` }, APP.brandTagline),
       el(
         'p',
         { class: 'lead' },
@@ -144,7 +145,7 @@ export async function render(ctx) {
         el('li', {}, icon('check'), el('span', {}, 'Vite for building and code-splitting; each route is its own chunk.')),
         el('li', {}, icon('check'), el('span', {}, 'Motion (Framer Motion’s vanilla engine) for restrained, reduced-motion-aware animation.')),
         el('li', {}, icon('check'), el('span', {}, 'Lucide for iconography; SortableJS for planner drag & drop (with button alternatives).')),
-        el('li', {}, icon('check'), el('span', {}, 'Libre Bodoni & Public Sans, self-hosted via Fontsource (OFL licensed).')),
+        el('li', {}, icon('check'), el('span', {}, 'Playfair Display & Inter, self-hosted via Fontsource (OFL licensed).')),
         el('li', {}, icon('check'), el('span', {}, 'Design system generated with the UI/UX Pro Max skill — see design-system/culina/MASTER.md.')),
       ),
     ),
@@ -155,6 +156,7 @@ export async function render(ctx) {
       el('h2', {}, 'Legal & disclaimer'),
       el('p', {}, 'CULINA aggregates third-party open data for discovery purposes. Recipe, nutrition and product information is provided “as is” by its sources and may be incomplete or out of date. Nothing here is dietary, medical or allergen advice — always check labels and use your judgment. Open Food Facts data is licensed under the Open Database License (ODbL) v1.0.'),
       el('p', { class: 'muted', style: { marginTop: 'var(--space-3)', fontSize: 'var(--text-sm)' } }, `CULINA v${APP.version} — ${APP.tagline}`),
+      el('p', { class: 'muted', style: { marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)' } }, `${APP.developerCredit}.`),
     ),
   );
 

@@ -40,14 +40,14 @@
 
 ### Typography
 
-- **Heading Font:** Libre Bodoni
-- **Body Font:** Public Sans
+- **Heading Font:** Playfair Display (approved brand board, v1.1.0)
+- **Body Font:** Inter
 - **Mood:** magazine, editorial, publishing, refined, journalism, print
 - **Google Fonts:** [Libre Bodoni + Public Sans](https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap)
 
 **CSS Import:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Libre+Bodoni:wght@400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap');
 ```
 
 ### Spacing Variables
@@ -233,3 +233,5 @@ Before delivering any UI code, verify:
 - [ ] Responsive: 375px, 768px, 1024px, 1440px
 - [ ] No content hidden behind fixed navbars
 - [ ] No horizontal scroll on mobile
+
+> **Identity update (v1.1.0):** the approved brand board (`docs/brand/culina-brand-board.png`) is the visual source of truth — Ember Gold `#FFB703`, Spicy Orange `#FB5607`, Fresh Green `#2ECC71`, Deep Crimson `#E63946`, Midnight `#0B0F19`, Cream `#FFF7E6`; Playfair Display + Inter. Semantic token mapping with AA-verified shade derivations: `css/tokens.css` + `scripts/verify-contrast.py` (see `docs/DESIGN-DECISIONS.md` §21).

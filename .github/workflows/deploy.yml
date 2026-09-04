@@ -1,0 +1,60 @@
+name: Deploy to GitHub Pages
+
+# Deploys the production build to GitHub Pages on every push to main that
+# changes application code, docs or workflows. Deployment only runs after a
+# green CI pipeline — quality gates are never bypassed.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Quality gates (tests → audit → build)
+        run: |
+          npm ci
+          npm test
+          npm run audit
+          npm audit --audit-level=high
+
+      - name: Build for the Pages sub-path
+        env:
+          # SITE_URL is emitted by the Pages environment; the base must match
+          # the repository's Pages path (/culina) for a project site.
+          PUBLIC_URL: https://${{ github.repository_owner }}.github.io/culina
+        run: |
+          npm run build -- --base=/culina/
+          node scripts/set-origin.mjs "$PUBLIC_URL" dist
+          # SPA deep links on GitHub Pages: the static 404 page boots the app,
+          # whose router then renders the requested route client-side.
+          cp dist/index.html dist/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

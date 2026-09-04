@@ -10,6 +10,8 @@
  */
 import { spawn } from 'node:child_process';
 import { request } from 'node:http';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const PORT = 3999;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -19,6 +21,19 @@ let failed = 0;
 function ok(name) { passed++; console.log(`  ✓ ${name}`); }
 function fail(name, detail) { failed++; console.log(`  ✗ ${name} — ${detail}`); }
 function assert(cond, name, detail = '') { cond ? ok(name) : fail(name, detail); }
+
+/** Fetch binary bodies intact (for PNG asset checks). */
+function fetchBuffer(path) {
+  return new Promise((resolve, reject) => {
+    const req = request({ host: '127.0.0.1', port: PORT, path, method: 'GET' }, (res) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, buf: Buffer.concat(chunks) }));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
 
 /** Fetch with full header access (follows nothing, keeps status). */
 function fetchRaw(path, { method = 'GET' } = {}) {
@@ -131,6 +146,62 @@ try {
   }
   const indexed = await fetchRaw('/recipes');
   assert(indexed.headers['x-robots-tag'] === undefined, 'public routes are indexable (no header)');
+
+  /* 10 — brand asset system (approved identity) */
+  const ROOT = join(new URL('..', import.meta.url).pathname, '.');
+  const pngSize = (buf) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) });
+
+  const brandSvgs = [
+    '/brand/culina-mark.svg', '/brand/culina-mark-tile.svg', '/brand/culina-wordmark.svg',
+    '/brand/culina-logo.svg', '/brand/culina-logo-dark.svg', '/brand/culina-logo-light.svg',
+    '/icons/favicon.svg',
+  ];
+  for (const p of brandSvgs) {
+    const res = await fetchRaw(p);
+    assert(res.status === 200 && (res.headers['content-type'] || '').includes('svg'), `${p} served as SVG`);
+  }
+
+  const pngAssets = [
+    ['/favicon-16.png', 16, 16], ['/favicon-32.png', 32, 32], ['/favicon-64.png', 64, 64],
+    ['/icons/icon-192.png', 192, 192], ['/icons/icon-512.png', 512, 512],
+    ['/icons/icon-maskable-512.png', 512, 512], ['/icons/apple-touch-icon.png', 180, 180],
+    ['/social/og-image.png', 1200, 630], ['/social/twitter-card.png', 1200, 628],
+  ];
+  for (const [p, w, h] of pngAssets) {
+    const res = await fetchBuffer(p);
+    const isPng = res.headers['content-type']?.includes('png');
+    const sizeOk =
+      res.status === 200 && isPng && res.buf.length > 8 &&
+      res.buf.readUInt32BE(0) === 0x89504e47 && pngSize(res.buf).w === w && pngSize(res.buf).h === h;
+    assert(res.status === 200 && isPng && sizeOk, `${p} served as ${w}×${h} PNG`);
+  }
+
+  /* canonical brand sources are byte-identical everywhere they are mirrored */
+  for (const name of ['culina-mark.svg', 'culina-mark-tile.svg', 'culina-wordmark.svg', 'culina-logo.svg', 'culina-logo-dark.svg', 'culina-logo-light.svg']) {
+    const assets = readFileSync(join(ROOT, 'assets/brand', name), 'utf8');
+    const pub = readFileSync(join(ROOT, 'public/brand', name), 'utf8');
+    assert(assets === pub, `assets/brand/${name} mirrors public/brand byte-for-byte`);
+  }
+  const tileSvg = readFileSync(join(ROOT, 'assets/brand/culina-mark-tile.svg'), 'utf8').trim();
+  const markModule = readFileSync(join(ROOT, 'js/components/mark-tile.js'), 'utf8');
+  assert(markModule.includes(tileSvg), 'js/components/mark-tile.js embeds the canonical tile');
+
+  /* manifest carries the real brand icons + colors */
+  const mf = JSON.parse((await fetchRaw('/manifest.webmanifest')).body);
+  assert(mf.theme_color === '#0b0f19' && mf.background_color === '#fff7e6', 'manifest uses brand Midnight/Cream');
+  for (const ic of mf.icons) {
+    // icon srcs are relative to the manifest (deployment-agnostic)
+    const iconPath = new URL(ic.src, `${BASE}/manifest.webmanifest`).pathname;
+    const res = await fetchRaw(iconPath);
+    assert(res.status === 200, `manifest icon ${ic.src} resolves`);
+  }
+
+  /* index.html favicon + social meta wiring */
+  const shellHome = await fetchRaw('/');
+  assert(shellHome.body.includes('rel="icon" type="image/svg+xml"'), 'SVG favicon linked');
+  assert(shellHome.body.includes('favicon-16.png') && shellHome.body.includes('favicon-32.png'), 'PNG favicons linked');
+  assert(shellHome.body.includes('summary_large_image'), 'Twitter large-image card declared');
+  assert(shellHome.body.includes('/social/og-image.png'), 'OG image referenced');
 } finally {
   child.kill('SIGTERM');
 }

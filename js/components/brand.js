@@ -1,71 +1,83 @@
 /**
- * CULINA — Brand components (single source of truth, PRD §1).
+ * CULINA — Brand components (single source of truth).
  *
- * The approved mark: an open ring (the plate) in ember with a cream garnish
- * dot seated in the opening — espresso-inspired, flat, no gradients.
- * Geometry is FIXED (viewBox 0 0 32 32, arc r=12 stroke 3, dot r=2.4 at
- * (28,16)) and must not be restated anywhere else in the app.
+ * The approved mark (docs/brand/culina-brand-board.png): a golden/orange C
+ * incorporating a chef hat, fork, spoon, fresh green leaf, cocktail element
+ * and a culinary flame, on the Midnight tile. Geometry is generated ONLY by
+ * scripts/generate-brand-assets.py into assets/brand/culina-mark-tile.svg
+ * (mirrored to public/brand/ for direct serving),
+ * which this module inlines at build time (vite ?raw) — it is never restated
+ * in code. The SVG string is our own static asset; it is parsed with
+ * DOMParser (XML) and attached via importNode — no HTML injection path.
  *
- *   BrandMark      — the bare mark (decorative, aria-hidden by default)
- *   BrandIcon      — mark on the espresso rounded square (favicon-style tile)
- *   BrandWordmark  — the CULINA wordmark text
- *   BrandLogo      — mark + wordmark (optionally as a home link)
+ *   BrandMark      — the tiled mark (decorative, aria-hidden by default)
+ *   BrandIcon      — the tiled mark under the favicon-style class
+ *   BrandWordmark  — the CULINA wordmark text (display font via .brand-word)
+ *   BrandLogo      — mark + wordmark lockup (optionally as a home link)
  */
 import { el } from '../utils/dom.js';
 import { APP } from '../constants.js';
+import markTileRaw from './mark-tile.js';
 
-/** The one true mark. Returns an SVG element. */
-export function BrandMark({ size = 24, className = 'brand-mark', title = null } = {}) {
-  const svg = el('svg', {
-    class: className,
-    viewBox: '0 0 32 32',
-    fill: 'none',
-    width: String(size),
-    height: String(size),
-    'aria-hidden': title ? null : 'true',
-    role: title ? 'img' : null,
-    focusable: 'false',
-  });
-  if (title) {
-    const label = el('title', {}, title);
-    svg.append(label);
+/* Parse the canonical tile lazily (browser only) and clone per instance. */
+let template = null;
+let instanceSeq = 0;
+
+function getTemplate() {
+  if (template) return template;
+  if (typeof DOMParser === 'undefined') {
+    throw new Error('[brand] the mark can only be rendered in a browser environment');
   }
-  svg.append(
-    el('path', {
-      d: 'M22.9 6.2 A12 12 0 1 0 22.9 25.8',
-      stroke: 'currentColor',
-      'stroke-width': '3',
-      'stroke-linecap': 'round',
-    }),
-    el('circle', { cx: '28', cy: '16', r: '2.4', fill: 'currentColor' }),
-  );
+  const parsed = new DOMParser().parseFromString(markTileRaw, 'image/svg+xml');
+  const root = parsed.documentElement;
+  if (!root || root.nodeName.toLowerCase() !== 'svg') {
+    throw new Error('[brand] mark-tile.js does not contain a valid SVG document');
+  }
+  template = root;
+  return template;
+}
+
+function cloneMark({ size = 24, className = 'brand-mark', title = null } = {}) {
+  const svg = document.importNode(getTemplate(), true);
+  instanceSeq += 1;
+  // Gradient ids must be unique per instance (header + footer render in the
+  // same document) — rewrite id="cg"/"fg" and their url(#…) references.
+  const uid = `b${instanceSeq}`;
+  for (const node of svg.querySelectorAll('[id]')) {
+    const oldId = node.id;
+    const newId = `${oldId}-${uid}`;
+    node.id = newId;
+    for (const ref of svg.querySelectorAll(`[fill="url(#${oldId})"], [stroke="url(#${oldId})"]`)) {
+      const attr = (ref.getAttribute('fill') || '').startsWith('url(') ? 'fill' : 'stroke';
+      ref.setAttribute(attr, `url(#${newId})`);
+    }
+  }
+  svg.setAttribute('class', className);
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.removeAttribute('aria-label');
+  if (title) {
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', title);
+  } else {
+    svg.setAttribute('aria-hidden', 'true');
+    svg.removeAttribute('role');
+  }
+  svg.setAttribute('focusable', 'false');
   return svg;
 }
 
-/** Mark on the espresso rounded square (favicon / PWA style). */
-export function BrandIcon({ size = 32, radius = 7, className = 'brand-icon', title = `${APP.name} logo` } = {}) {
-  const svg = el('svg', {
-    class: className,
-    viewBox: '0 0 32 32',
-    width: String(size),
-    height: String(size),
-    role: 'img',
-    'aria-label': title,
-    focusable: 'false',
-  });
-  svg.append(el('rect', { x: '0', y: '0', width: '32', height: '32', rx: String(radius), fill: '#181109' }));
-  const inner = BrandMark({ size: 0, className: 'brand-icon-mark' });
-  inner.removeAttribute('width');
-  inner.removeAttribute('height');
-  inner.setAttribute('transform', 'translate(2.6 2.6) scale(0.84)');
-  inner.setAttribute('color', '#F0743C');
-  // The garnish dot stays cream on the tile.
-  inner.querySelector('circle')?.setAttribute('fill', '#F6EFE6');
-  svg.append(inner);
-  return svg;
+/** The tiled brand mark. */
+export function BrandMark({ size = 24, className = 'brand-mark', title = null } = {}) {
+  return cloneMark({ size, className, title });
 }
 
-/** The wordmark — always Libre Bodoni via the .brand-word class. */
+/** The tiled mark under the favicon-style class (larger standalone uses). */
+export function BrandIcon({ size = 56, className = 'brand-icon', title = `${APP.name} logo` } = {}) {
+  return cloneMark({ size, className, title });
+}
+
+/** The wordmark — display serif via the .brand-word class. */
 export function BrandWordmark({ className = 'brand-word', text = APP.name } = {}) {
   return el('span', { class: className }, text);
 }
@@ -78,7 +90,7 @@ export function BrandLogo({ href = '/', compact = false, ariaLabel = `${APP.name
   const inner = el(
     'span',
     { class: 'brand-lockup' },
-    BrandMark({ size: markSize, className: 'brand-mark' }),
+    cloneMark({ size: markSize, className: 'brand-mark' }),
     BrandWordmark(),
   );
   if (compact) inner.classList.add('is-compact');
