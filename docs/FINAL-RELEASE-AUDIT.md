@@ -171,3 +171,34 @@ Round-2 audit (approved brand board + release hardening brief). Full findings: `
 | Live verification | shell, fonts, brand mark, live provider data, SW scope `/culina/`, deep link via 404 bootstrap, absolute og:image/canonical/sitemap/robots — all verified against the deployed HTTPS site |
 
 **v1.1.0 verdict: RELEASE CANDIDATE READY** (limitations unchanged from §24, plus: Fruityvice degrades honestly on Pages — no proxy on static hosting; Pages deep links return HTTP 404 status by mechanism while serving the app; Search Console verification remains an owner-side manual step).
+
+
+---
+
+## Release gate addendum — v1.2.0 brand trace (2026-09-04)
+
+Commits `b924547` (brand v1.2.0) + `da9587a` (migration report) + the
+favicon.ico pipeline fix.
+
+**Pipeline (CI, commit da9587a):** Tests/Audit/Build/Gateway ✓ ·
+Browser E2E chromium ✓ · Browser E2E firefox ✓.
+
+**Deploy:** first attempt failed at *Dependency audit* — npm's audit endpoint
+was unavailable through all 5 retries (registry outage; the same audit passes
+locally with 0 vulnerabilities against the live registry). Re-run of the
+failed job → deploy **success**. Not a product defect; recorded here because
+deployment is always gated on a green pipeline, and it was — the gate did its
+job against a flaky external service.
+
+**Defect found by live verification and fixed:** `favicon.ico` contained a
+single 16×16 frame instead of the documented 16/32/48. Fixed in the
+pipeline (manifest `ico` assembly + rasterizer ICO builder + a 3-frame
+gateway contract assertion — see MIGRATION-REPORT §5). All 48 raster targets
+re-rendered byte-identically, confirming pipeline determinism.
+
+**Live verification (https://devara1983ntr.github.io/culina/):** all 14
+`/brand/*.svg` byte-identical to the canonical vectors; favicon set (ICO +
+16/32/48 + SVG + apple-touch) 200 with correct MIME; `favicon-64.png` → 404;
+`sw.js` → v1.2.0; manifest icons incl. maskable 192/512 + brand colors;
+og-image 1200×630 / twitter-card 1200×628; OG/Twitter meta absolute and
+sub-path-correct (`/culina/...`).

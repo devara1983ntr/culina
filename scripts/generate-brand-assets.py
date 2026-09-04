@@ -326,6 +326,13 @@ targets = []
 def tgt(svg, out, w, h):
     targets.append({"kind": "svg", "svg": svg, "out": out, "w": w, "h": h})
 
+# ICO assemblies: multi-frame favicon.ico built by the rasterizer from the
+# dedicated per-size renders (PNG-embedded frames — byte-copied, not rescaled).
+ICO_ASSEMBLIES = [{
+    "out": "favicon.ico",
+    "sources": ["favicon-16.png", "favicon-32.png", "favicon-48.png"],
+}]
+
 # favicon pngs (public root)
 for s in (16, 32, 48):
     tgt(favicon_svg, f"favicon-{s}.png", s, s)
@@ -364,7 +371,7 @@ for s in ICON_SMALL:
     tgt(icon_svg(s, small=True), f"assets/brand/icons/culina-icon-{s}.png", s, s)
 
 (ROOT / "scripts" / "raster-manifest.json").write_text(
-    json.dumps({"targets": targets}, indent=1))
+    json.dumps({"targets": targets, "ico": ICO_ASSEMBLIES}, indent=1))
 
 # mark-tile.js (in-app module; mirrors culina-mark-tile.svg exactly)
 tile_raw = svgs["culina-mark-tile.svg"].strip()
@@ -409,3 +416,31 @@ print(f"vector family: {len(svgs)} SVGs → assets/brand/vector + public/brand")
 print(f"raster targets: {len(targets)} → scripts/raster-manifest.json")
 print(f"trace IoU: monogram={mono['iou']['combined']:.4f} emblem={emblem['iou']['full']:.4f}")
 print("next: node scripts/rasterize-brand.mjs && python3 scripts/generate-brand-assets.py --mirror-rasters")
+
+# ------------------------------------------------------------------ mirrors
+def mirror_rasters():
+    """Copy the rasterized public/ outputs into the canonical assets/brand
+    layout (favicon/, pwa/, social/) so every shipped raster exists exactly
+    once as a canonical file + serving mirror (asserted by gateway-test)."""
+    pairs = []
+    for s in (16, 32, 48):
+        pairs.append((ROOT / "public" / f"favicon-{s}.png", AB / "favicon" / f"favicon-{s}.png"))
+    pairs += [
+        (ROOT / "public" / "favicon.ico", AB / "favicon" / "favicon.ico"),
+        (ROOT / "public" / "icons" / "favicon.svg", AB / "favicon" / "favicon.svg"),
+        (ROOT / "public" / "social" / "og-image.png", AB / "social" / "og-image.png"),
+        (ROOT / "public" / "social" / "twitter-card.png", AB / "social" / "twitter-card.png"),
+    ]
+    for name in ("icon-192.png", "icon-512.png", "icon-maskable-192.png",
+                 "icon-maskable-512.png", "apple-touch-icon.png"):
+        pairs.append((ROOT / "public" / "icons" / name, AB / "pwa" / name))
+    for src, dst in pairs:
+        if not src.exists():
+            sys.exit(f"mirror: missing {src} — run node scripts/rasterize-brand.mjs first")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dst)
+    print(f"mirrored {len(pairs)} rasters → assets/brand/{{favicon,pwa,social}}")
+
+if "--mirror-rasters" in sys.argv:
+    mirror_rasters()
+    sys.exit(0)

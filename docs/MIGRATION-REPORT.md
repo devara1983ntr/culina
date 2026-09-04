@@ -112,16 +112,41 @@ nothing live (asserted by the gateway suite).
 | Route/link audit (`npm run audit`) | **PASSED** (34 routes) |
 | WCAG 2.2 AA contrast (`verify-contrast.py`, both themes) | **ALL PAIRS PASS** |
 | Production build (`vite build`) | ✓ 3.6 s |
-| Gateway suite (`gateway-test.mjs`) | **381/381** (incl. brand contract: SVG validity, 14-vector mirrors, raster mirrors, ICO + favicon dims, maskable 192, icon family, retired/archived reference scan) |
+| Gateway suite (`gateway-test.mjs`) | **381/381** (incl. brand contract: SVG validity, 14-vector mirrors, raster mirrors, ICO **3-frame** directory check, favicon dims, maskable 192, icon family, retired/archived reference scan) |
 | E2E Chromium (`browser-qa.mjs`) | **92/92**, clean console |
 | E2E Firefox | **92/92** (one transient font fetch during the offline-injection phase) |
 | Render check (`scripts/brand/render-check.mjs`) | all 14 vector assets parse + render in Chromium |
+| favicon.ico frame audit | 3 frames (16/32/48); each frame byte-embeds its dedicated render; PIL decodes all frames pixel-identical |
+
+### Defect found & fixed during release verification
+
+Live verification caught that `favicon.ico` shipped with a **single 16×16
+frame** (the ad-hoc assembly step had silently written one frame instead of
+three). Fixed *in the pipeline*, not by hand:
+
+- `scripts/generate-brand-assets.py` now emits an `ico` assembly block
+  (`favicon.ico` ← favicon-16/32/48.png) into `raster-manifest.json`;
+- `scripts/rasterize-brand.mjs` assembles a proper 3-frame PNG-embedded ICO
+  from the dedicated per-size renders (byte-copied, never rescaled);
+- the gateway suite now parses the ICO directory and asserts 3 frames
+  16/32/48 — the defect class is now regression-guarded;
+- `--mirror-rasters` (previously only promised in the generator's usage
+  text) is implemented: the canonical mirrors in `assets/brand/` are produced
+  by the pipeline itself. Re-rasterizing all 48 targets reproduced every
+  other PNG byte-identically (deterministic pipeline confirmed).
 
 ## 6. Deployment & live verification (after push)
 
 ```bash
 git push origin main          # CI: unit + audit + build + gateway + E2E (both engines) + deploy
 ```
+
+First deploy attempt failed in CI at the `npm audit` step — the npm
+registry's audit endpoint was unavailable for the whole 5-retry window
+(known transient; the same audit passes with **0 vulnerabilities** against
+the live registry, and a re-run of the failed job deployed cleanly). CI
+itself was green on the first pass: unit/audit/build/gateway ✓, E2E
+chromium ✓, E2E firefox ✓.
 
 Post-deploy smoke (against https://devara1983ntr.github.io/culina/):
 

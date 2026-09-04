@@ -63,4 +63,49 @@ for (const t of manifest.targets) {
   }
 }
 await browser.close();
+
+/* ------------------------------------------------------------------------ *
+ * ICO assemblies (manifest.ico): multi-size favicon.ico built from the
+ * dedicated per-size PNG renders just produced. Each frame embeds the
+ * complete PNG file (Vista+ PNG-in-ICO) — byte-copied, never rescaled.
+ * ------------------------------------------------------------------------ */
+function assembleIco(entry) {
+  const srcPaths = entry.sources.map((src) =>
+    src.startsWith('assets/') ? join(ROOT, src) : join(ROOT, 'public', src));
+  const pngs = srcPaths.map((p) => readFileSync(p));
+  const n = pngs.length;
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // type: icon
+  header.writeUInt16LE(n, 4);
+  let offset = 6 + 16 * n;
+  const entries = pngs.map((buf) => {
+    const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20); // PNG IHDR
+    const e = Buffer.alloc(16);
+    e[0] = w >= 256 ? 0 : w;
+    e[1] = h >= 256 ? 0 : h;
+    e.writeUInt16LE(1, 4); // color planes
+    e.writeUInt16LE(32, 6); // bits per pixel
+    e.writeUInt32LE(buf.length, 8);
+    e.writeUInt32LE(offset, 12);
+    offset += buf.length;
+    return e;
+  });
+  const out = entry.out.startsWith('assets/')
+    ? join(ROOT, entry.out)
+    : join(ROOT, 'public', entry.out);
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, Buffer.concat([header, ...entries, ...pngs]));
+  console.log('assembled', entry.out, `${n} frames (${pngs.map((b) => b.readUInt32BE(16)).join('/')}px)`);
+}
+
+for (const entry of manifest.ico || []) {
+  try {
+    assembleIco(entry);
+  } catch (err) {
+    failures++;
+    console.error('FAILED ico', entry.out, err.message);
+  }
+}
+
 process.exit(failures ? 1 : 0);

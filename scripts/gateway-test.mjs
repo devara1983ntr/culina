@@ -172,8 +172,19 @@ try {
 
   /* favicon set: ICO + 16/32/48 PNGs (favicon-64 is retired) */
   const ico = await fetchBuffer('/favicon.ico');
-  assert(ico.status === 200 && ico.buf.length > 8 && ico.buf.readUInt16BE(0) === 0,
-    '/favicon.ico served as ICO');
+  const icoOk = ico.status === 200 && ico.buf.length > 8 && ico.buf.readUInt16LE(0) === 0 &&
+    ico.buf.readUInt16LE(2) === 1;
+  let icoFrames = [];
+  if (icoOk) {
+    const n = ico.buf.readUInt16LE(4);
+    for (let i = 0; i < n && i < 16; i++) {
+      const e = ico.buf.subarray(6 + i * 16, 6 + (i + 1) * 16);
+      icoFrames.push([e[0] || 256, e[1] || 256, e.readUInt32LE(8)]);
+    }
+  }
+  assert(icoOk && icoFrames.length === 3 &&
+    icoFrames.every(([w, h]) => [16, 32, 48].includes(w) && w === h),
+    '/favicon.ico is a 3-frame ICO (16/32/48)');
   const pngAssets = [
     ['/favicon-16.png', 16, 16], ['/favicon-32.png', 32, 32], ['/favicon-48.png', 48, 48],
     ['/icons/icon-192.png', 192, 192], ['/icons/icon-512.png', 512, 512],
