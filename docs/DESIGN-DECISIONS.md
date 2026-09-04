@@ -113,3 +113,18 @@ The product's first identity ("open-ring plate", espresso/ember palette, Libre B
 - **The mark always sits on its Midnight tile.** Cream/gold/green/crimson elements of the mark are invisible on a Cream ground, so the tiled form is the only in-app variant — matching how the board itself presents the mark.
 - **Tagline usage.** `TASTE • DISCOVER • PLAN • ENJOY` (board tagline) appears in the footer, About page and lockup assets; `Discover food. Understand it. Make it yours.` remains the product descriptor (title/OG/README).
 - **Honest limitation:** the emblem is reconstructed from the board's written specification and a programmatic palette/layout analysis of the image (this environment has no human visual review of the board); it is a faithful rendering of the specified elements, not a pixel trace. The geometry is generated code in the repository, so any fine-tuning is a one-file change.
+
+### §22 — Brand assets are traced, not redrawn (v1.2.0)
+
+The v1.1.0 mark was generated from the *written* brand specification. v1.2.0
+replaces it with geometry **measured from the approved board artwork**:
+forensics (`docs/brand/BOARD-FORENSICS.md`) located the emblem (Panel A
+badge), the monogram (Panel B badge) and the tagline, and proved the earlier
+source-region assumption wrong. The monogram is contour-traced (IoU 0.97
+against its source mask); the emblem is quantized into 16 traced color
+layers (union IoU 0.92); painted/photorealistic shading is preserved as
+LANCZOS raster masters (the spec's high-res-raster branch). The board has no
+CULINA lettering and its painted tagline matches no real typeface (measured),
+so wordmark typography uses Playfair Display Italic outlines — a documented
+derivation, not a claimed trace. The full inventory, fidelity numbers, safe
+areas and minimum sizes live in `docs/BRAND-ASSET-MANIFEST.md`.

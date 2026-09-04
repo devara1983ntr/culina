@@ -6,7 +6,7 @@
  *   (never cached forever — food data changes).
  * - No credentials are ever cached (none exist).
  */
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const STATIC_CACHE = `culina-static-${VERSION}`;
 const DATA_CACHE = 'culina-data-v1';
 const DATA_TTL = 10 * 60 * 1000;
@@ -19,7 +19,7 @@ const SCOPE = new URL(self.registration.scope);
 const ROOT_URL = new URL('./', SCOPE).toString();
 const OFFLINE_URL = new URL('./offline.html', SCOPE).toString();
 const MANIFEST_URL = new URL('./manifest.webmanifest', SCOPE).toString();
-const FAVICON_URL = new URL('./favicon-64.png', SCOPE).toString();
+const FAVICON_URL = new URL('./favicon-48.png', SCOPE).toString();
 
 const API_HOSTS = [
   'themealdb.com',

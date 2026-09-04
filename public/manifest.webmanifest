@@ -9,7 +9,11 @@
   "background_color": "#fff7e6",
   "theme_color": "#0b0f19",
   "id": "./",
-  "categories": ["food", "lifestyle", "shopping"],
+  "categories": [
+    "food",
+    "lifestyle",
+    "shopping"
+  ],
   "lang": "en",
   "icons": [
     {
@@ -29,6 +33,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "./icons/icon-maskable-512.png",

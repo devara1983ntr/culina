@@ -1,9 +1,10 @@
 /**
  * CULINA — Brand components (single source of truth).
  *
- * The approved mark (docs/brand/culina-brand-board.png): a golden/orange C
- * incorporating a chef hat, fork, spoon, fresh green leaf, cocktail element
- * and a culinary flame, on the Midnight tile. Geometry is generated ONLY by
+ * The approved mark (docs/brand/culina-brand-board.png): the Panel B
+ * monogram — a bold C whose top terminal swells chef-hat-like, a fork nested
+ * in its aperture, green herb sprigs — traced from the board artwork (IoU
+ * 0.97, scripts/brand/trace_monogram.py) and composed onto the cream tile by
  * scripts/generate-brand-assets.py into assets/brand/culina-mark-tile.svg
  * (mirrored to public/brand/ for direct serving),
  * which this module inlines at build time (vite ?raw) — it is never restated

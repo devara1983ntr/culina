@@ -4,6 +4,58 @@ All notable changes to CULINA are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-09-04
+
+Brand asset engineering: the identity is now **traced from the approved
+board artwork**, not reconstructed from the written spec.
+
+### Added
+- **Traced asset family** (see `docs/BRAND-ASSET-MANIFEST.md`): the Panel B
+  monogram (IoU 0.97) as the canonical `culina-mark` (+ dark/light
+  presentations), the Panel A full-color emblem as `culina-emblem` (16
+  quantized color layers, union IoU 0.92), the formal `culina-lockup`
+  (emblem + CULINA + tagline), `culina-logo-{dark,light}` badge lockups,
+  and explicit monogram aliases — 14 canonical SVGs with byte-identical
+  `public/brand/` mirrors.
+- **Favicon set completed**: `favicon.ico` (16+32+48), `favicon-48.png`,
+  SVG favicon as a deliberate small-size monogram variant (no sprigs,
+  expanded strokes). `favicon-64.png` retired.
+- **App icon family**: all 14 sizes (512→16) with a deliberate ≤48 px
+  simplified variant; PWA icons gain `icon-maskable-192.png`; apple-touch
+  (180) follows the board's own app-icon mockup (cream plate + monogram).
+- **Social cards rebuilt** from traced paths only (emblem tile + Playfair
+  wordmark + tagline + description) — no font dependency even at source.
+- **Asset governance**: `assets/brand/{source,master,vector,raster,icons,
+  favicon,pwa,social,archive}` structure; the board copy + forensic region
+  map in `source/`; faithful LANCZOS raster masters in `master/`; the
+  complete v1.1.0 set archived in `archive/v1.1.0/`.
+- **Brand primitives in tokens**: `--culina-{ember-gold,spicy-orange,
+  fresh-green,deep-crimson,midnight,cream}` + `--font-ui`.
+- **Docs**: `docs/BRAND-ASSET-MANIFEST.md` (full inventory, tracing
+  fidelity, typography derivation, safe areas, minimum sizes) and
+  `docs/brand/BOARD-FORENSICS.md` (board region map, emblem character
+  correction, typography verification).
+- Gateway brand-asset contract extended: SVG validity, full vector-family
+  mirrors, raster mirrors, icon-family dimensions, maskable 192, ICO,
+  retired/archived reference scan.
+- E2E section K extended: ICO + 48 px favicon wiring, emblem/lockup/maskable
+  resolution.
+
+### Changed
+- `js/components/mark-tile.js` now embeds the traced monogram tile (was the
+  v1.1.0 spec reconstruction); `brand.js` documentation updated.
+- Service worker cache bumped to **1.2.0** (new branding precached; retired
+  `favicon-64.png` cache key replaced by `favicon-48.png`).
+- `manifest.webmanifest` icons: maskable 192 added.
+- Wordmark/logo typography re-set in Playfair Display **Italic** (matching
+  the board's tagline lettering language) as fontTools outlines.
+
+### Fixed
+- **The v1.1.0 mark was not the board's emblem**: forensic tracing located
+  the true emblem (Panel A badge) and monogram (Panel B badge) on the board
+  and proved the v1.1.0 source-region assumption pointed at photographic
+  texture. All brand geometry is now measured from the artwork itself.
+
 ## [1.1.0] — 2026-09-04
 
 Approved-brand integration, release hardening and public repository readiness.

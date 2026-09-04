@@ -1,0 +1,66 @@
+{
+ "board": "1536x1024, midnight ground",
+ "panelA_badge": [
+  871,
+  67,
+  1008,
+  222
+ ],
+ "panelA_interior": [
+  889,
+  85,
+  1000,
+  205
+ ],
+ "panelB_badge": [
+  871,
+  243,
+  1007,
+  392
+ ],
+ "hero_illustration": [
+  208,
+  64,
+  484,
+  433
+ ],
+ "palette_strip_y": [
+  480,
+  538
+ ],
+ "swatches": {
+  "gold": [
+   1034,
+   1089
+  ],
+  "orange": [
+   1113,
+   1167
+  ],
+  "green": [
+   1192,
+   1246
+  ],
+  "crimson": [
+   1274,
+   1330
+  ],
+  "cream": [
+   1438,
+   1494
+  ]
+ },
+ "tagline_TASTE_DISCOVER_PLAN_ENJOY": [
+  100,
+  576,
+  587,
+  589
+ ],
+ "app_icon_mockup": [
+  1110,
+  780,
+  1170,
+  840
+ ],
+ "badge_shape": "rounded square ~137x155, r~26"
+}

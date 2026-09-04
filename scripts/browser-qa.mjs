@@ -760,13 +760,16 @@ try {
     return {
       isSvg: mark ? mark.tagName.toLowerCase() === 'svg' : false,
       gradients: mark ? mark.querySelectorAll('linearGradient').length : 0,
+      paths: mark ? mark.querySelectorAll('path').length : 0,
+      midnight: mark ? !!mark.querySelector('path[fill="#0b0f19"], path[fill="#0B0F19"]') : false,
+      green: mark ? !!mark.querySelector('path[fill="#2ecc71"], path[fill="#2ECC71"]') : false,
       word: word ? word.textContent.trim() : null,
       font: word ? getComputedStyle(word).fontFamily : '',
       bg: getComputedStyle(document.body).backgroundColor,
     };
   });
-  lockup.isSvg && lockup.gradients >= 2
-    ? pass('header renders the tiled C-mark (inline SVG, brand gradients)')
+  lockup.isSvg && lockup.paths >= 2 && lockup.midnight && lockup.green && lockup.gradients === 0
+    ? pass('header renders the traced flat C-mark (inline SVG: Midnight C + green sprigs)')
     : fail('header mark', JSON.stringify(lockup));
   lockup.word === 'CULINA' && /Playfair Display/.test(lockup.font)
     ? pass('wordmark is CULINA in Playfair Display')
@@ -779,15 +782,16 @@ try {
   // 2. favicon + social meta wiring in the document head
   const head = await page.evaluate(() => ({
     svgIcon: !!document.querySelector('link[rel="icon"][type="image/svg+xml"]'),
-    pngIcons: ['16x16', '32x32', '64x64'].every((s) => document.querySelector(`link[rel="icon"][sizes="${s}"]`)),
+    icoIcon: !!document.querySelector('link[rel="icon"][href$=".ico"]'),
+    pngIcons: ['16x16', '32x32', '48x48'].every((s) => document.querySelector(`link[rel="icon"][sizes="${s}"]`)),
     apple: !!document.querySelector('link[rel="apple-touch-icon"]'),
     ogImage: document.querySelector('meta[property="og:image"]')?.content || '',
     twitterCard: document.querySelector('meta[name="twitter:card"]')?.content || '',
     twitterImage: document.querySelector('meta[name="twitter:image"]')?.content || '',
     splashImg: document.querySelector('#boot-splash img')?.getAttribute('src') || '',
   }));
-  head.svgIcon && head.pngIcons && head.apple
-    ? pass('favicon set linked (SVG + 16/32/64 PNG + apple-touch)')
+  head.svgIcon && head.icoIcon && head.pngIcons && head.apple
+    ? pass('favicon set linked (SVG + ICO + 16/32/48 PNG + apple-touch)')
     : fail('favicon links', JSON.stringify(head));
   head.ogImage.startsWith('http') && head.twitterImage.startsWith('http') && head.twitterCard === 'summary_large_image'
     ? pass('OG/Twitter card images absolute, large-image card')
@@ -799,8 +803,11 @@ try {
   // 3. brand assets + manifest icons resolve
   const assetPaths = await page.evaluate(async () => {
     const paths = [
-      '/brand/culina-mark-tile.svg', '/brand/culina-logo.svg', '/social/og-image.png',
-      '/social/twitter-card.png', '/icons/icon-512.png', '/icons/favicon.svg',
+      '/brand/culina-mark-tile.svg', '/brand/culina-logo.svg',
+      '/brand/culina-mark.svg', '/brand/culina-emblem.svg', '/brand/culina-lockup.svg',
+      '/brand/culina-logo-dark.png', '/favicon.ico', '/favicon-48.png',
+      '/social/og-image.png', '/social/twitter-card.png',
+      '/icons/icon-512.png', '/icons/icon-maskable-192.png', '/icons/favicon.svg',
     ];
     const out = {};
     for (const p of paths) out[p] = (await fetch(p, { cache: 'no-store' })).status;

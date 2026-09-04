@@ -13,6 +13,19 @@
 
 :root {
   /* ---------------------------------------------------------------------
+     Brand primitives (approved board palette — the six identity colors).
+     Raw identity hues for brand contexts (marks, accents, illustration);
+     UI colors must use the AA-verified semantic tokens below, not these.
+     --------------------------------------------------------------------- */
+  --culina-ember-gold: #ffb703;
+  --culina-spicy-orange: #fb5607;
+  --culina-fresh-green: #2ecc71;
+  --culina-deep-crimson: #e63946;
+  --culina-midnight: #0b0f19;
+  --culina-cream: #fff7e6;
+  --font-ui: var(--font-body);
+
+  /* ---------------------------------------------------------------------
      Typography
      Playfair Display (culinary editorial display serif) + Inter (UI/body).
      Self-hosted via @fontsource — properly licensed (OFL).

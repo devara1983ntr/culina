@@ -66,7 +66,7 @@ typography — *TASTE • DISCOVER • PLAN • ENJOY*.
 
 - **Palette** — Ember Gold `#FFB703` · Spicy Orange `#FB5607` · Fresh Green `#2ECC71` · Deep Crimson `#E63946` · Midnight `#0B0F19` · Cream `#FFF7E6`. Deepened/lightened shades of these hues appear only where WCAG 2.2 AA contrast requires them (every pairing verified by `scripts/verify-contrast.py`).
 - **Typography** — Playfair Display for editorial display moments, Inter for UI/body. Self-hosted via Fontsource (OFL), subset to latin, `font-display: swap`.
-- **Assets** — all brand geometry (mark, tile, wordmark, logo lockups, favicons, PWA icons, OG/Twitter cards) is generated from a single source: `python3 scripts/generate-brand-assets.py` then `node scripts/rasterize-brand.mjs`. The app embeds the canonical tile as a generated module (`js/components/mark-tile.js`), mirrored byte-for-byte to `assets/brand/` and `public/brand/` — asserted by the gateway test suite.
+- **Assets** — all brand geometry is **traced from the approved board** (`scripts/brand/trace_monogram.py`, `scripts/brand/trace_emblem.py`; IoU-measured) and composed by `python3 scripts/generate-brand-assets.py` + `node scripts/rasterize-brand.mjs` into the full family (mark, emblem, monogram, wordmark, lockup, logos, favicons incl. `.ico`, 14-size icon set, maskable PWA icons, OG/Twitter cards). Canonical files live in `assets/brand/{vector,raster,icons,favicon,pwa,social,master,source,archive}` and mirror byte-for-byte into `public/` — asserted by the gateway suite. Full inventory + fidelity + safe areas: `docs/BRAND-ASSET-MANIFEST.md`.
 
 ## Architecture
 

@@ -147,25 +147,40 @@ try {
   const indexed = await fetchRaw('/recipes');
   assert(indexed.headers['x-robots-tag'] === undefined, 'public routes are indexable (no header)');
 
-  /* 10 — brand asset system (approved identity) */
+  /* 10 — brand asset system (traced from the approved board, v1.2.0) */
   const ROOT = join(new URL('..', import.meta.url).pathname, '.');
   const pngSize = (buf) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) });
+  const { readdirSync, statSync } = await import('node:fs');
 
-  const brandSvgs = [
-    '/brand/culina-mark.svg', '/brand/culina-mark-tile.svg', '/brand/culina-wordmark.svg',
-    '/brand/culina-logo.svg', '/brand/culina-logo-dark.svg', '/brand/culina-logo-light.svg',
-    '/icons/favicon.svg',
-  ];
-  for (const p of brandSvgs) {
-    const res = await fetchRaw(p);
-    assert(res.status === 200 && (res.headers['content-type'] || '').includes('svg'), `${p} served as SVG`);
+  /* every canonical vector asset is served as a valid SVG */
+  const vectorDir = join(ROOT, 'assets/brand/vector');
+  const brandSvgs = readdirSync(vectorDir).filter((f) => f.endsWith('.svg'));
+  assert(brandSvgs.length >= 13, `vector family complete (${brandSvgs.length} SVGs)`);
+  for (const name of brandSvgs) {
+    const res = await fetchRaw(`/brand/${name}`);
+    const ct = res.headers['content-type'] || '';
+    assert(res.status === 200 && ct.includes('svg'), `/brand/${name} served as SVG`);
+    const body = res.body.trim();
+    assert(body.startsWith('<svg') && body.includes('viewBox=') && body.endsWith('</svg>'),
+      `/brand/${name} is a valid standalone SVG (viewBox + single root)`);
+    const assets = readFileSync(join(vectorDir, name), 'utf8');
+    assert(assets === res.body, `/brand/${name} byte-identical to the canonical vector asset`);
+    const pub = readFileSync(join(ROOT, 'public/brand', name), 'utf8');
+    assert(assets === pub, `assets/brand/vector/${name} mirrors public/brand byte-for-byte`);
   }
+  assert((await fetchRaw('/icons/favicon.svg')).status === 200, 'favicon.svg served');
 
+  /* favicon set: ICO + 16/32/48 PNGs (favicon-64 is retired) */
+  const ico = await fetchBuffer('/favicon.ico');
+  assert(ico.status === 200 && ico.buf.length > 8 && ico.buf.readUInt16BE(0) === 0,
+    '/favicon.ico served as ICO');
   const pngAssets = [
-    ['/favicon-16.png', 16, 16], ['/favicon-32.png', 32, 32], ['/favicon-64.png', 64, 64],
+    ['/favicon-16.png', 16, 16], ['/favicon-32.png', 32, 32], ['/favicon-48.png', 48, 48],
     ['/icons/icon-192.png', 192, 192], ['/icons/icon-512.png', 512, 512],
-    ['/icons/icon-maskable-512.png', 512, 512], ['/icons/apple-touch-icon.png', 180, 180],
+    ['/icons/icon-maskable-192.png', 192, 192], ['/icons/icon-maskable-512.png', 512, 512],
+    ['/icons/apple-touch-icon.png', 180, 180],
     ['/social/og-image.png', 1200, 630], ['/social/twitter-card.png', 1200, 628],
+    ['/brand/culina-logo-dark.png', 512, 185], ['/brand/culina-logo-light.png', 512, 185],
   ];
   for (const [p, w, h] of pngAssets) {
     const res = await fetchBuffer(p);
@@ -175,22 +190,40 @@ try {
       res.buf.readUInt32BE(0) === 0x89504e47 && pngSize(res.buf).w === w && pngSize(res.buf).h === h;
     assert(res.status === 200 && isPng && sizeOk, `${p} served as ${w}×${h} PNG`);
   }
+  assert((await fetchRaw('/favicon-64.png')).status !== 200, 'retired favicon-64.png is gone');
 
-  /* canonical brand sources are byte-identical everywhere they are mirrored */
-  for (const name of ['culina-mark.svg', 'culina-mark-tile.svg', 'culina-wordmark.svg', 'culina-logo.svg', 'culina-logo-dark.svg', 'culina-logo-light.svg']) {
-    const assets = readFileSync(join(ROOT, 'assets/brand', name), 'utf8');
-    const pub = readFileSync(join(ROOT, 'public/brand', name), 'utf8');
-    assert(assets === pub, `assets/brand/${name} mirrors public/brand byte-for-byte`);
+  /* canonical raster mirrors (assets/brand ↔ public/) are byte-identical */
+  const mirrorPairs = [];
+  for (const f of readdirSync(join(ROOT, 'assets/brand/favicon')))
+    mirrorPairs.push([`assets/brand/favicon/${f}`, f === 'favicon.svg' ? `icons/${f}` : f]);
+  for (const f of readdirSync(join(ROOT, 'assets/brand/pwa')))
+    mirrorPairs.push([`assets/brand/pwa/${f}`, `icons/${f}`]);
+  for (const f of readdirSync(join(ROOT, 'assets/brand/social')))
+    mirrorPairs.push([`assets/brand/social/${f}`, `social/${f}`]);
+  for (const [a, pubPath] of mirrorPairs) {
+    const A = readFileSync(join(ROOT, a));
+    const B = readFileSync(join(ROOT, 'public', pubPath));
+    assert(A.equals(B), `${a} mirrors public/${pubPath} byte-for-byte`);
   }
-  const tileSvg = readFileSync(join(ROOT, 'assets/brand/culina-mark-tile.svg'), 'utf8').trim();
+  /* icon family (all 14 sizes exist as square PNGs) */
+  const iconSizes = [512, 384, 256, 192, 180, 152, 144, 128, 96, 72, 64, 48, 32, 16];
+  for (const s of iconSizes) {
+    const buf = readFileSync(join(ROOT, `assets/brand/icons/culina-icon-${s}.png`));
+    assert(pngSize(buf).w === s && pngSize(buf).h === s, `culina-icon-${s}.png is ${s}×${s}`);
+  }
+
+  /* the in-app mark module embeds the canonical tile */
+  const tileSvg = readFileSync(join(ROOT, 'assets/brand/vector/culina-mark-tile.svg'), 'utf8').trim();
   const markModule = readFileSync(join(ROOT, 'js/components/mark-tile.js'), 'utf8');
   assert(markModule.includes(tileSvg), 'js/components/mark-tile.js embeds the canonical tile');
 
   /* manifest carries the real brand icons + colors */
   const mf = JSON.parse((await fetchRaw('/manifest.webmanifest')).body);
   assert(mf.theme_color === '#0b0f19' && mf.background_color === '#fff7e6', 'manifest uses brand Midnight/Cream');
+  assert(mf.icons.some((i) => i.purpose === 'maskable' && i.sizes === '192x192') &&
+    mf.icons.some((i) => i.purpose === 'maskable' && i.sizes === '512x512'),
+    'manifest carries maskable icons at 192 and 512');
   for (const ic of mf.icons) {
-    // icon srcs are relative to the manifest (deployment-agnostic)
     const iconPath = new URL(ic.src, `${BASE}/manifest.webmanifest`).pathname;
     const res = await fetchRaw(iconPath);
     assert(res.status === 200, `manifest icon ${ic.src} resolves`);
@@ -199,9 +232,31 @@ try {
   /* index.html favicon + social meta wiring */
   const shellHome = await fetchRaw('/');
   assert(shellHome.body.includes('rel="icon" type="image/svg+xml"'), 'SVG favicon linked');
-  assert(shellHome.body.includes('favicon-16.png') && shellHome.body.includes('favicon-32.png'), 'PNG favicons linked');
+  assert(shellHome.body.includes('favicon.ico'), 'ICO favicon linked');
+  assert(shellHome.body.includes('favicon-16.png') && shellHome.body.includes('favicon-32.png') &&
+    shellHome.body.includes('favicon-48.png'), 'PNG favicons 16/32/48 linked');
+  assert(shellHome.body.includes('favicon-64.png') === false, 'no retired favicon references');
   assert(shellHome.body.includes('summary_large_image'), 'Twitter large-image card declared');
   assert(shellHome.body.includes('/social/og-image.png'), 'OG image referenced');
+
+  /* archived v1.1.0 brand assets exist but are referenced by nothing live */
+  const archived = readdirSync(join(ROOT, 'assets/brand/archive/v1.1.0'));
+  assert(archived.length >= 6, 'v1.1.0 brand assets archived');
+  const liveCode = ['index.html', 'public/sw.js', 'public/manifest.webmanifest'];
+  for (const f of ['js', 'css', 'scripts']) {
+    const dir = join(ROOT, f);
+    for (const entry of readdirSync(dir, { recursive: true })) {
+      const rel = entry.toString();
+      if (/test|qa/.test(rel)) continue; // the QA suites themselves assert on these names
+      const fp = join(dir, rel);
+      try { if (statSync(fp).isFile()) liveCode.push(fp); } catch { /* skip */ }
+    }
+  }
+  for (const fp of liveCode) {
+    const body = readFileSync(fp, 'utf8');
+    assert(!body.includes('assets/brand/archive'), `${fp} references no archived assets`);
+    assert(!body.includes('favicon-64'), `${fp} references no retired assets`);
+  }
 } finally {
   child.kill('SIGTERM');
 }

@@ -49,7 +49,9 @@ for (const t of manifest.targets) {
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(150);
     }
-    const out = join(ROOT, 'public', t.out);
+    const out = t.out.startsWith('assets/')
+      ? join(ROOT, t.out)
+      : join(ROOT, 'public', t.out);
     mkdirSync(dirname(out), { recursive: true });
     await page.screenshot({ path: out, omitBackground: !t.solid });
     console.log('rasterized', t.out, `${t.w}x${t.h}`);
