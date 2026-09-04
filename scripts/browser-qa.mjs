@@ -21,7 +21,6 @@
  *   K. Brand identity & metadata (mark, fonts, favicons, social, credit)
  */
 import { chromium, firefox } from 'playwright-core';
-import sparticuz from '@sparticuz/chromium';
 
 const ENGINE = process.env.CULINA_QA_ENGINE === 'firefox' ? 'firefox' : 'chromium';
 const EXECUTABLE = process.env.CULINA_QA_EXECUTABLE || null;
@@ -31,8 +30,15 @@ async function launchBrowser() {
   if (ENGINE === 'firefox') {
     return pw.launch({ executablePath: EXECUTABLE, headless: true });
   }
+  if (EXECUTABLE) {
+    // CI resolves and installs its own browser build (playwright-core only).
+    return pw.launch({ executablePath: EXECUTABLE, args: ['--no-sandbox'], headless: true });
+  }
+  // Sandbox/default: the @sparticuz/chromium build (optional peer — imported
+  // lazily so environments without it can use CULINA_QA_EXECUTABLE instead).
+  const sparticuz = (await import('@sparticuz/chromium')).default;
   return pw.launch({
-    executablePath: EXECUTABLE || (await sparticuz.executablePath()),
+    executablePath: await sparticuz.executablePath(),
     args: [...sparticuz.args, '--no-sandbox'],
     headless: true,
   });
