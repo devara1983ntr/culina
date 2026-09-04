@@ -1,4 +1,4 @@
-<p align="center"><img src="public/brand/culina-logo.svg" width="360" alt="CULINA — TASTE • DISCOVER • PLAN • ENJOY"></p>
+<p align="center"><img src="assets/brand/source/culina-logo-board.png" width="360" alt="CULINA — TASTE • DISCOVER • PLAN • ENJOY"></p>
 
 # CULINA
 
