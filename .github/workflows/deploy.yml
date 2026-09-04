@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Quality gates (tests → audit → build)
@@ -37,6 +37,7 @@ jobs:
           npm test
           npm run audit
           npm audit --audit-level=high
+          npm run build
 
       - name: Build for the Pages sub-path
         env:
