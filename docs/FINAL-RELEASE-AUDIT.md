@@ -148,3 +148,26 @@ Every other audit dimension in §3–§23 is green with evidence. No known defec
 # RELEASE READY WITH KNOWN LIMITATIONS
 
 The product is functionally complete, accessible, secure-by-configuration, performant, and covered by gates that fail loudly. The limitations above are environmental coverage boundaries, documented for the deployer — they do not affect correctness of what was built and tested.
+
+---
+
+## Addendum — v1.1.0 brand integration & public release gate (2026-09-04)
+
+Round-2 audit (approved brand board + release hardening brief). Full findings: `docs/GAP-REGISTER.md` round 2 (G-18…G-27, all fixed).
+
+| Gate | Result |
+| --- | --- |
+| Clean production build | ✓ (entry 32.7 kB gzip + vendor 42.9 kB gzip) |
+| Unit / integration | **70/70** |
+| Static audit | **PASSED** (88 files · 258 classes · 67/95 icons · 34 routes) |
+| WCAG 2.2 AA contrast | **ALL PAIRS PASS** (`scripts/verify-contrast.py`, both themes) |
+| Gateway contract | **72/72** (incl. 32 brand-asset assertions) |
+| Browser E2E — Chromium | **92/92** × 3 consecutive runs, exit 0 |
+| Browser E2E — Firefox | **92/92** × 2 consecutive runs, exit 0 |
+| `npm audit` | 0 vulnerabilities (retry logic for registry outages only) |
+| Marker search | 0 TODO/FIXME/HACK/placeholder |
+| GitHub Actions CI (real runners) | **green** — quality job + Chromium 92/92 + Firefox 92/92 |
+| GitHub Pages deployment | **green** — https://devara1983ntr.github.io/culina/ |
+| Live verification | shell, fonts, brand mark, live provider data, SW scope `/culina/`, deep link via 404 bootstrap, absolute og:image/canonical/sitemap/robots — all verified against the deployed HTTPS site |
+
+**v1.1.0 verdict: RELEASE CANDIDATE READY** (limitations unchanged from §24, plus: Fruityvice degrades honestly on Pages — no proxy on static hosting; Pages deep links return HTTP 404 status by mechanism while serving the app; Search Console verification remains an owner-side manual step).
