@@ -29,8 +29,19 @@ jobs:
       - name: Production build
         run: npm run build
 
-      - name: Dependency audit (fail on high+)
-        run: npm audit --audit-level=high
+      - name: Dependency audit (fail on high+; retry on registry outages)
+        run: |
+          # Retry ONLY when the audit service itself is unavailable (5xx/DNS).
+          # A real finding fails immediately — nothing is ever ignored.
+          for i in 1 2 3 4 5; do
+            OUT=$(npm audit --audit-level=high 2>&1); CODE=$?
+            if [ $CODE -eq 0 ]; then echo "$OUT"; exit 0; fi
+            if echo "$OUT" | grep -qiE "503|Service Unavailable|EAI_AGAIN|ETIMEDOUT|ENOTFOUND|ECONNRESET|audit endpoint returned an error"; then
+              echo "$OUT"; echo "→ audit service unavailable, retry $i/5 in 30s"; sleep 30; continue
+            fi
+            echo "$OUT"; exit $CODE
+          done
+          echo "audit service unavailable after 5 attempts"; exit 1
 
       - name: Gateway tests (security headers · proxy allowlist · SPA fallback)
         run: node scripts/gateway-test.mjs
