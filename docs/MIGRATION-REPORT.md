@@ -1,165 +1,116 @@
-# Brand Migration Report — v1.1.0 → v1.2.0
+# Brand Migration Report — v1.2.0 → v1.3.0
 
-**Scope:** replace the v1.1.0 specification-reconstructed brand assets with
-geometry **traced from the approved brand board**
-(`docs/brand/culina-brand-board.png`), extend the family to every required
-use case, and verify nothing regressed.
+**Scope:** replace the v1.2.0 board-traced brand assets with geometry
+**traced from the user-supplied original artwork** —
+`assets/brand/source/culina-logo-board.png` (IMG-A, the logo composition)
+and `assets/brand/source/culina-emblem-master.png` (IMG-B, the emblem
+master) — the new absolute source of truth, and verify nothing regressed.
 
-**Commit:** `b924547` (+ this report). **Result:** local battery fully green
-(see §5). Deployment/live verification steps in §6.
+**Commit:** `f8ce17d` (+ this report). **Result:** local battery fully green
+(§5), CI 3/3, deploy green, live verification 30/30 (§6).
 
 ---
 
 ## 1. What changed and why
 
-The v1.1.0 mark was drawn from the *written* brand specification. Forensic
-re-reading of the board (`docs/brand/BOARD-FORENSICS.md`) proved:
+The v1.2.0 system traced the *old* brand board: its Panel A/B regions, its
+(derived, Playfair-outline) wordmark, its cream tile presentation. The
+supplied artwork supersedes all of that:
 
-1. **The v1.1.0 source-region assumption was wrong** — it pointed at
-   photographic texture (the board's food imagery), not the emblem.
-2. The board presents the identity twice: **Panel A** (full-color emblem —
-   delicate linework, gold/orange masses and a thin dark web painted directly
-   on the shared cream badge surface; 61% cream / 23% color / 16% dark web
-   at 6×) and **Panel B** (flat monogram — bold C, chef-hat terminal, fork in
-   the aperture, green herb sprigs).
-3. The board contains **no CULINA lettering**; its painted tagline letterforms
-   match no real typeface (measured per-glyph: best ≈ 0.46 IoU).
-
-v1.2.0 therefore ships **measured** geometry:
-
-| Asset family | Built from | Fidelity |
-|---|---|---|
-| `culina-mark` (+dark/light, monogram aliases) | Panel B: threshold → find_contours → B-spline → cubic Bézier | IoU **0.969** vs source mask; Chromium render vs board crop **0.921** |
-| `culina-emblem` | Panel A: 16-cluster k-means → per-layer contours, on the cream squircle tile | union IoU **0.918** |
-| `culina-wordmark`, `culina-lockup`, logos, OG/Twitter cards | Playfair Display Italic **font outlines** (fontTools) | documented derivation (no board lettering exists) |
-| `assets/brand/master/` | LANCZOS extractions (Panel A 4×, Panel B 4×, hero 3×) | faithful rasters, no invented detail |
-
-The traced emblem renders flatter than the board's painted shading — an
-honest, documented simplification (16 flat fills), which is exactly what the
-spec's vector-fidelity branch requires.
-
-## 2. File-level migration
-
-**Added (canonical)**
-- `assets/brand/vector/` — 14 SVGs: `culina-mark{-dark,-light}.svg`,
-  `culina-monogram{,-cream}.svg`, `culina-emblem.svg`, `culina-wordmark{,-midnight}.svg`,
-  `culina-lockup{,-light}.svg`, `culina-logo.svg`, `culina-logo-{dark,light}.svg`,
-  `culina-mark-tile.svg` — byte-identical mirrors served from `public/brand/`.
-- `assets/brand/{favicon,pwa,social,icons,raster}/` — canonical rasters +
-  mirrors into `public/` (favicon set at root, icons in `public/icons/`,
-  cards in `public/social/`).
-- `assets/brand/source/` — board copy + forensic region map.
-- `assets/brand/master/` — high-res raster masters (the §3 raster branch).
-- `assets/brand/build/` — committed trace outputs (generator inputs).
-- `scripts/brand/` — `trace_lib.py`, `trace_monogram.py`, `trace_emblem.py`,
-  `wordmark_lib.py`, `build_wordmark.py`, `render-check.mjs`.
-- `public/favicon.ico` (16+32+48), `public/favicon-48.png`,
-  `public/icons/icon-maskable-192.png`.
-- `docs/BRAND-ASSET-MANIFEST.md` — full inventory, fidelity numbers,
-  typography derivation, safe areas, minimum sizes.
-
-**Replaced (content superseded, names kept)** — `public/brand/*.svg` (6),
-favicon 16/32 PNGs, PWA icons 192/512/maskable-512, apple-touch, OG/Twitter
-cards, `js/components/mark-tile.js` (now embeds the traced tile), generator +
-rasterizer (`scripts/raster-manifest.json` now 48 targets).
-
-**Removed / retired**
-- `public/favicon-64.png` (superseded by 48 + ICO) — `sw.js` cache key moved
-  to `favicon-48.png`, cache version bumped `1.1.0 → 1.2.0` (clean swap, no
-  stale-cache branding).
-- `public/social/*.src.html` (v1.1.0 card generators; archived).
-
-**Archived** — the complete v1.1.0 set in `assets/brand/archive/v1.1.0/`
-(6 SVGs, raster manifest, README, social card sources). Referenced by
-nothing live (asserted by the gateway suite).
-
-**Integrated**
-- `index.html`: favicon SVG + ICO + 16/32/48 + apple-touch 180.
-- `manifest.webmanifest`: + `icon-maskable-192.png`.
-- `css/tokens.css`: `--culina-{ember-gold,spicy-orange,fresh-green,
-  deep-crimson,midnight,cream}` primitives + `--font-ui` (raw identity hues;
-  UI keeps the AA-verified semantic tokens).
-- `package.json` → 1.2.0; `public/sw.js` → v1.2.0.
-
-## 3. Requirements compliance (tracing spec)
-
-- **§3 genuine vectors:** every SVG is Bézier paths / font outlines — no
-  raster-in-SVG, no renamed PNGs (gateway asserts SVG validity + mirrors).
-- **§3 raster branch:** LANCZOS masters, no invented detail.
-- **§13 small sizes:** ≤48 px icons are a *deliberate variant* (sprigs
-  dropped, strokes expanded) — never a blind downscale; favicon.svg likewise.
-- **Squircle geometry:** all badge-shaped assets use the board's rounded-
-  square app-icon language (favicon.svg keeps the 64 px squircle).
-- **Trace-if-vectorizable:** emblem color layers + monogram traced from the
-  artwork (IoU above); typography documented as derived (no lettering on the
-  board to trace).
-- **Deployment:** sub-path-safe (relative manifest icons, `set-origin.mjs`
-  rewrites social images at deploy).
-
-## 4. Known limitations (documented, not hidden)
-
-- The vector emblem is a 16-color flattening of painterly board shading —
-  fidelity choice documented in `docs/BRAND-ASSET-MANIFEST.md`; the raster
-  masters carry the painterly detail.
-- Monogram herb sprigs trace at IoU 0.746 (small painted marks; kept ≥200 px
-  area, token-mapped to Fresh Green).
-
-## 5. Verification (executed, local)
-
-| Check | Result |
+| v1.2.0 (superseded) | v1.3.0 (this migration) |
 |---|---|
-| Unit tests (`node --test tests/`) | **70/70** |
-| Route/link audit (`npm run audit`) | **PASSED** (34 routes) |
-| WCAG 2.2 AA contrast (`verify-contrast.py`, both themes) | **ALL PAIRS PASS** |
-| Production build (`vite build`) | ✓ 3.6 s |
-| Gateway suite (`gateway-test.mjs`) | **381/381** (incl. brand contract: SVG validity, 14-vector mirrors, raster mirrors, ICO **3-frame** directory check, favicon dims, maskable 192, icon family, retired/archived reference scan) |
-| E2E Chromium (`browser-qa.mjs`) | **92/92**, clean console |
-| E2E Firefox | **92/92** (one transient font fetch during the offline-injection phase) |
-| Render check (`scripts/brand/render-check.mjs`) | all 14 vector assets parse + render in Chromium |
-| favicon.ico frame audit | 3 frames (16/32/48); each frame byte-embeds its dedicated render; PIL decodes all frames pixel-identical |
+| Emblem traced from old board Panel A (16 layers) | Emblem traced from the dedicated emblem master — 14 k-means layers, union IoU **0.908** |
+| Wordmark = Playfair Display outlines (documented derivation) | Wordmark **traced from the board's own painted letterforms** — three-tone gold/deep/white, IoU 0.81–0.93 |
+| Tagline/ornament absent from lockups (derived Playfair italic) | Tagline (*TASTE • DISCOVER • PLAN • ENJOY*, IoU 0.908) + utensil ornament (IoU 0.881) traced and composed into logo/lockup/social |
+| Tile = Cream squircle + flat monogram | Tile = **Midnight #0B0F19 square + six-family simplified emblem** (the artwork's own app-icon presentation) |
+| Logo PNGs letterboxed 512×185 | Natural aspect: 512×456 (dark) / 512×426 (light) |
+| 14 SVGs (incl. monogram aliases) | **13 SVGs** (monogram family retired; `culina-wordmark`/`-light`, `culina-icon` added) |
+| Social: emblem tile + wordmark + description | Social: emblem + wordmark + **tagline + ornament** + description, ink-budgeted to the 630 px canvas |
 
-### Defect found & fixed during release verification
+## 2. Deliverables produced
 
-Live verification caught that `favicon.ico` shipped with a **single 16×16
-frame** (the ad-hoc assembly step had silently written one frame instead of
-three). Fixed *in the pipeline*, not by hand:
+- **Vector family (13):** mark (+dark/light), emblem, icon, wordmark
+  (+light), mark-tile, lockup (+light), logo (+dark/light) — all genuine
+  traced Bézier geometry, zero raster embeds (asserted), byte-identical
+  mirrors in `public/brand/`.
+- **Favicon system:** SVG tile (= canonical mark-tile), 16/32/48 PNGs,
+  3-frame ICO (16/32/48); `favicon-64.png` stays retired.
+- **App icons:** 14 sizes (512→16) with §13 tiers — ≥64 px full geometry;
+  48 px simple+thr 0; 32 px +4000; 16 px +12000 — never a blind downscale.
+- **PWA:** 192/512 any + maskable, apple-touch 180 — full-bleed Midnight.
+- **Social:** og-image 1200×630, twitter-card 1200×628.
+- **Raster renders (24):** mark/emblem/wordmark/lockup/logo families incl.
+  transparent variants; 52 rasterization targets, browser-true rendering.
+- **Embedded mark:** `js/components/mark-tile.js` regenerated **by the
+  pipeline** (new generator step), asserted path-for-path against the
+  canonical tile by the gateway suite.
+- **Docs:** `docs/BRAND-ASSET-MANIFEST.md` (v1.3.0 inventory),
+  `docs/brand/BOARD-FORENSICS.md` (new sources, trace IoUs, six-family
+  table), DESIGN-DECISIONS §22, GAP-REGISTER Round 3 (G-24…G-28), CHANGELOG
+  1.3.0, README/CONTRIBUTING/MASTER path fixes.
 
-- `scripts/generate-brand-assets.py` now emits an `ico` assembly block
-  (`favicon.ico` ← favicon-16/32/48.png) into `raster-manifest.json`;
-- `scripts/rasterize-brand.mjs` assembles a proper 3-frame PNG-embedded ICO
-  from the dedicated per-size renders (byte-copied, never rescaled);
-- the gateway suite now parses the ICO directory and asserts 3 frames
-  16/32/48 — the defect class is now regression-guarded;
-- `--mirror-rasters` (previously only promised in the generator's usage
-  text) is implemented: the canonical mirrors in `assets/brand/` are produced
-  by the pipeline itself. Re-rasterizing all 48 targets reproduced every
-  other PNG byte-identically (deterministic pipeline confirmed).
+## 3. What was retired
 
-## 6. Deployment & live verification (after push)
+The complete v1.2.0 set — vectors, rasters, icons, favicons, PWA, social,
+masters, build JSONs, the old board copy and the v1.2.0 trace scripts — is
+archived under `assets/brand/archive/v1.2.0/`. Nothing live references it
+(gateway asserts the retired surfaces 404: `/favicon-64.png`,
+`/brand/culina-monogram.svg`). The stale `monogram-geom.json` build file was
+deleted (not archived — superseded, not source).
 
-```bash
-git push origin main          # CI: unit + audit + build + gateway + E2E (both engines) + deploy
-```
+## 4. Fidelity evidence (full tables in `docs/brand/BOARD-FORENSICS.md`)
 
-First deploy attempt failed in CI at the `npm audit` step — the npm
-registry's audit endpoint was unavailable for the whole 5-retry window
-(known transient; the same audit passes with **0 vulnerabilities** against
-the live registry, and a re-run of the failed job deployed cleanly). CI
-itself was green on the first pass: unit/audit/build/gateway ✓, E2E
-chromium ✓, E2E firefox ✓.
+| Asset | Layers | IoU |
+|---|---|---|
+| Emblem (IMG-B) | 14 color layers | union **0.9084** (worst layer 0.8437) |
+| Wordmark (IMG-A) | 3 layers | 0.9265 / 0.8128 / 0.7991 |
+| Tagline (IMG-A) | 1 | **0.9081** |
+| Ornament (IMG-A) | 1 | **0.8809** |
+| §13 six-family simplification | 6 | 0.842–0.943 per family |
 
-Post-deploy smoke (against https://devara1983ntr.github.io/culina/):
+Visual verification (hue-ASCII mapping, no vision available): source board
+vs traced logo-dark side-by-side — emblem, wordmark, tagline and ornament
+bands match in position and proportion; favicon-16 legible; og-image carries
+all five ink bands (emblem 48–288, wordmark 314–443, tagline 466–487,
+ornament 496–510, description 539–558).
 
-```bash
-BASE=https://devara1983ntr.github.io/culina
-curl -sf $BASE/favicon.ico                     -o /dev/null && echo "ico OK"
-curl -sf $BASE/favicon-48.png                  -o /dev/null && echo "48 OK"
-curl -sf $BASE/icons/icon-maskable-192.png     -o /dev/null && echo "maskable OK"
-curl -sf $BASE/brand/culina-emblem.svg         -o /dev/null && echo "emblem OK"
-curl -sf $BASE/brand/culina-lockup.svg         -o /dev/null && echo "lockup OK"
-curl -s  $BASE/favicon-64.png -o /dev/null -w "%{http_code}\n"   # expect 404
-curl -s  $BASE/sw.js | grep -o "1\.2\.0" | head -1               # expect 1.2.0
-```
+## 5. Local battery (all green at `f8ce17d`)
 
-In a browser: hard-reload once (SW cache v1.2.0 swaps in), verify the header
-mark, tab favicon, and social preview (card validators).
+| Gate | Result |
+|---|---|
+| Unit tests | 70/70 |
+| Static audit | PASSED |
+| WCAG 2.2 AA contrast | all pairs pass |
+| Production build | ✓ |
+| Gateway suite | **391/391** (new: no-raster-embed per served SVG, tile-module path-for-path embed, natural-aspect PNG dims) |
+| Browser E2E — Chromium | **92/92** (new: header = traced emblem on Midnight tile; `/brand/culina-wordmark.svg` resolves) |
+| Browser E2E — Firefox | **92/92** |
+
+Two test-suite corrections were made during integration, both filed in
+GAP-REGISTER Round 3: the provider-outage E2E check now polls up to 15 s
+(single-shot 7 s was exceeded by sandbox load + retry backoff — the error
+state verifiably appears), and the gateway tile-embed assertion is now
+path-for-path (the module legitimately adds width/height/aria attributes).
+
+## 6. Deployment & live verification
+
+- Push `f8ce17d` → **CI 3/3** (quality + Chromium E2E + Firefox E2E) →
+  **Deploy to GitHub Pages: success**.
+- Live checks against `https://devara1983ntr.github.io/culina/` — **30/30**:
+  - All **13 `/brand/*.svg`** byte-identical to canonical, SVG MIME, no
+    raster embeds; `favicon.svg` == canonical tile.
+  - `favicon.ico` = 3 frames (16/32/48); logo PNGs 512×456 / 512×426;
+    social cards 1200×630 / 1200×628.
+  - `sw.js` VERSION 1.3.0; splash uses `/brand/culina-mark-tile.svg`;
+    manifest name "CULINA — Food Intelligence & Discovery" + maskable
+    192/512.
+  - Retired surfaces 404 (`favicon-64.png`, `culina-monogram.svg`).
+
+## 7. Verdict
+
+**BRAND SYSTEM READY** — v1.3.0 geometry is traced from the supplied
+artwork at measured fidelity, integrated at every touchpoint (header, boot
+splash, favicons, PWA, social, docs), archived cleanly, and verified end to
+end: local battery, CI on both browser engines, deployment, and the live
+surface. No placeholder assets, no renamed rasters, no raster-in-SVG, no
+stale branding.
