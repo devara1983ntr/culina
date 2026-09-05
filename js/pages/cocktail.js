@@ -11,6 +11,7 @@ import { sourcePanel } from '../components/providerBadge.js';
 import { skeletonDetail, emptyState, errorState, renderInto } from '../components/states.js';
 import { toast } from '../components/toast.js';
 import { mountReveal } from './shared.js';
+import { mountImageLightbox } from '../components/lightbox.js';
 import { history } from '../services/history.js';
 
 export async function render(ctx) {
@@ -202,5 +203,8 @@ export async function render(ctx) {
     });
 
   refreshIcons();
+  /* Tap a hero photo to enlarge it (lightbox). */
+  mountImageLightbox(ctx, root);
+
   return root;
 }

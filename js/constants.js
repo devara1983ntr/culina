@@ -7,7 +7,7 @@ export const APP = {
   tagline: 'Discover food. Understand it. Make it yours.',
   brandTagline: 'TASTE • DISCOVER • PLAN • ENJOY',
   supportingCopy: 'Recipes, ingredients, nutrition and drinks — intelligently connected.',
-  version: '1.1.0',
+  version: '1.4.0',
   repoUrl: 'https://github.com/devara1983ntr/culina',
   developerCredit: 'Designed & developed by Roshan',
 };

@@ -15,7 +15,7 @@ export async function render(ctx) {
     overline: 'The fine print, kept readable',
     title: 'Terms of use',
     lead: 'CULINA aggregates third-party open data for discovery purposes. These terms explain what that means for you.',
-    updated: '3 September 2026',
+    updated: '5 September 2026',
     sections: [
       {
         title: 'The service',

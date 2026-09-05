@@ -9,6 +9,8 @@ import { favorites, envelopeFor } from '../services/favorites.js';
 import { toast } from './toast.js';
 import { providerBadge } from './providerBadge.js';
 import { formatRating, truncate } from '../utils/format.js';
+import { navigate } from '../router.js';
+import { attachQuickActions, openQuickActions } from './quickActions.js';
 
 /** Route for a normalized item (null when the entity has no detail page). */
 export function itemRoute(entity, item) {
@@ -92,7 +94,7 @@ export function favoriteButton(entity, item, { label } = {}) {
     toast(added ? `Saved “${truncate(envelope.title, 42)}” to favorites` : `Removed “${truncate(envelope.title, 42)}” from favorites`, {
       type: added ? 'success' : 'info',
       action: added ? 'View' : null,
-      onAction: added ? () => location.assign('/favorites') : null,
+      onAction: added ? () => navigate('/favorites') : null,
     });
   });
 
@@ -190,6 +192,10 @@ export function entityCard({ entity, item, showFavorite = true, eager = false, f
       ),
     ),
   );
+
+  /* Long-press (touch) / right-click (desktop) → quick-actions sheet.
+     Every action in the sheet is also reachable via visible UI. */
+  attachQuickActions(card, () => openQuickActions({ entity, item, route }));
 
   return card;
 }

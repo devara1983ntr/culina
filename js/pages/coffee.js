@@ -9,6 +9,8 @@ import { entityGrid } from '../components/cards.js';
 import { chipRow } from '../components/filters.js';
 import { skeletonGrid, errorState, emptyState, renderInto, partialFailureNotice } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { attachTabSwipe } from '../utils/touch.js';
+import { replaceUrl } from '../router.js';
 
 export async function render(ctx) {
   let variant = ctx.query.tab === 'iced' ? 'iced' : 'hot';
@@ -20,6 +22,29 @@ export async function render(ctx) {
   });
 
   const resultsHost = el('div');
+  const variantHost = el('div', { style: { display: 'contents' } });
+
+  function renderVariantChips() {
+    variantHost.replaceChildren(
+      chipRow({
+        items: [{ id: 'hot', label: 'Hot' }, { id: 'iced', label: 'Iced' }],
+        value: variant,
+        onSelect: (id) => selectVariant(id),
+        ariaLabel: 'Coffee type',
+      }),
+    );
+  }
+
+  /** Switch variant (chip click or horizontal swipe on the results). */
+  function selectVariant(id) {
+    if (id === variant) return;
+    variant = id;
+    replaceUrl(`/coffee?tab=${id}`);
+    applyMeta({ title: 'Coffee', path: `/coffee?tab=${id}` });
+    renderVariantChips();
+    load();
+  }
+
   const root = el(
     'div',
     { class: 'page' },
@@ -34,20 +59,19 @@ export async function render(ctx) {
       el(
         'div',
         { class: 'filter-bar' },
-        chipRow({
-          items: [{ id: 'hot', label: 'Hot' }, { id: 'iced', label: 'Iced' }],
-          value: variant,
-          onSelect: (id) => {
-            variant = id;
-            history.replaceState(history.state, '', `/coffee?tab=${id}`);
-            applyMeta({ title: 'Coffee', path: `/coffee?tab=${id}` });
-            load();
-          },
-          ariaLabel: 'Coffee type',
-        }),
+        variantHost,
       ),
       resultsHost,
     ),
+  );
+
+  /* Swipe the results area left/right to switch between hot and iced. */
+  ctx.onCleanup(
+    attachTabSwipe(resultsHost, {
+      ids: ['hot', 'iced'],
+      getActive: () => variant,
+      onSelect: selectVariant,
+    }),
   );
 
   async function load() {
@@ -90,6 +114,7 @@ export async function render(ctx) {
     }
   }
 
+  renderVariantChips();
   load();
   refreshIcons();
   return root;

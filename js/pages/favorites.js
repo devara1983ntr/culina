@@ -8,12 +8,16 @@ import { applyMeta } from '../seo.js';
 import { favorites, COLLECTION_LABELS } from '../services/favorites.js';
 import { appState } from '../state.js';
 import { favoriteButton, mediaImage } from '../components/cards.js';
+import { attachQuickActions, openQuickActions } from '../components/quickActions.js';
+import { makeSwipeable, attachTabSwipe } from '../utils/touch.js';
+import { toast } from '../components/toast.js';
 import { providerBadge } from '../components/providerBadge.js';
 import { addToPlanDialog } from '../components/plannerWidgets.js';
 import { renderTabs } from '../components/tabs.js';
 import { viewToggle, selectField } from '../components/filters.js';
 import { emptyState, renderInto } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { replaceUrl } from '../router.js';
 
 const COLLECTION_ORDER = ['recipes', 'cocktails', 'beers', 'fruits', 'products', 'coffees', 'breweries'];
 
@@ -96,12 +100,7 @@ export async function render(ctx) {
       renderTabs({
         tabs: COLLECTION_ORDER.map((id) => ({ id, label: COLLECTION_LABELS[id], count: counts[id] })),
         active,
-        onSelect: (id) => {
-          active = id;
-          history.replaceState(history.state, '', `/favorites?tab=${id}`);
-          renderTabsBar();
-          renderGrid();
-        },
+        onSelect: (id) => selectCollection(id),
         ariaLabel: 'Favorite collections',
       }),
     );
@@ -141,7 +140,19 @@ export async function render(ctx) {
     refreshIcons();
   }
 
+  /* Swipe wrappers are rebuilt on every render — release the previous set
+     first so no stale gesture listeners accumulate. */
+  let swipeCleanups = [];
+  function clearSwipes() {
+    for (const fn of swipeCleanups) {
+      try { fn(); } catch { /* row already detached */ }
+    }
+    swipeCleanups = [];
+  }
+  ctx.onCleanup(clearSwipes);
+
   function renderGrid() {
+    clearSwipes();
     const items = favorites.forCollection(active);
     renderTools(items.length);
     if (!items.length) {
@@ -154,11 +165,44 @@ export async function render(ctx) {
       return;
     }
     const sorted = sort === 'name' ? [...items].sort((a, b) => a.title.localeCompare(b.title)) : items;
-    const grid = el('div', { class: 'grid-cards' }, ...sorted.map(favoriteCard));
+    const cards = sorted.map(favoriteCard);
+    const grid = el('div', { class: 'grid-cards' }, ...cards);
     grid.classList.toggle('is-list', view === 'list');
     renderInto(gridHost, grid);
+
+    /* List view: swipe a row left to un-save (the heart button on every
+       card remains the visible, accessible alternative). */
+    if (view === 'list') {
+      cards.forEach((card, index) => {
+        const env = sorted[index];
+        swipeCleanups.push(
+          makeSwipeable(card, () => {
+            favorites.remove(COLLECTION_ORDER.includes(active) ? active : 'recipes', env.id);
+            toast(`Removed “${env.title.slice(0, 42)}” from favorites`, { type: 'info' });
+          }, { threshold: 88, label: 'Remove' }),
+        );
+      });
+    }
+
     refreshIcons();
     mountReveal(ctx, gridHost.querySelector('.grid-cards'));
+  }
+
+  /* Horizontal swipe on the results area switches collections. */
+  ctx.onCleanup(
+    attachTabSwipe(gridHost, {
+      ids: COLLECTION_ORDER,
+      getActive: () => active,
+      onSelect: (id) => selectCollection(id),
+    }),
+  );
+
+  function selectCollection(id) {
+    if (id === active) return;
+    active = id;
+    replaceUrl(`/favorites?tab=${id}`);
+    renderTabsBar();
+    renderGrid();
   }
 
   const unsubscribe = appState.subscribe(() => renderGrid());

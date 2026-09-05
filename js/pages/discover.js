@@ -6,7 +6,7 @@
 import { el, icon } from '../utils/dom.js';
 import { refreshIcons } from '../utils/icons.js';
 import { applyMeta } from '../seo.js';
-import { navigate } from '../router.js';
+import { navigate, replaceUrl } from '../router.js';
 import {
   mealdb,
   cocktaildb,
@@ -21,6 +21,7 @@ import { chipRow, selectField, viewToggle, searchField, switchField } from '../c
 import { loadMoreButton, pagination } from '../components/pagination.js';
 import { skeletonGrid, errorState, emptyState, renderInto, partialFailureNotice } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { attachTabSwipe } from '../utils/touch.js';
 import { userMessage } from '../api/errors.js';
 
 const PAGE_SIZE = 24;
@@ -37,6 +38,8 @@ const BREWERY_TYPES = [
   'micro', 'brewpub', 'nano', 'regional', 'large', 'cidery', 'taproom', 'bar',
   'contract', 'proprietor', 'planning', 'closed', 'beergarden',
 ];
+
+const ENTITY_TAB_IDS = ['recipes', 'cocktails', 'beers', 'breweries', 'fruits', 'products'];
 
 const state = {
   entity: 'recipes',
@@ -61,7 +64,7 @@ function syncUrl() {
     }
   }
   const qs = params.toString();
-  history.replaceState(history.state, '', qs ? `/discover?${qs}` : '/discover');
+  replaceUrl(qs ? `/discover?${qs}` : '/discover');
 }
 
 function readUrl(query) {
@@ -125,16 +128,7 @@ export async function render(ctx) {
         { id: 'products', label: 'Food Products' },
       ],
       active: state.entity,
-      onSelect: (id) => {
-        Object.assign(state, {
-          entity: id, category: '', cuisine: '', q: '', nonAlcoholic: false,
-          ingredient: '', breweryType: '', country: '', page: 1,
-        });
-        syncUrl();
-        renderFilters();
-        load();
-        refreshEntityTabs();
-      },
+      onSelect: (id) => selectEntity(id),
       ariaLabel: 'Choose what to discover',
     });
   }
@@ -144,6 +138,28 @@ export async function render(ctx) {
   function refreshEntityTabs() {
     entityTabsHost.replaceChildren(renderEntityTabs());
   }
+
+  /** Switch the discovered entity (tab click or horizontal swipe). */
+  function selectEntity(id) {
+    if (id === state.entity) return;
+    Object.assign(state, {
+      entity: id, category: '', cuisine: '', q: '', nonAlcoholic: false,
+      ingredient: '', breweryType: '', country: '', page: 1,
+    });
+    syncUrl();
+    renderFilters();
+    load();
+    refreshEntityTabs();
+  }
+
+  /* Swipe the results area left/right to move between entity tabs. */
+  ctx.onCleanup(
+    attachTabSwipe(resultsHost, {
+      ids: ENTITY_TAB_IDS,
+      getActive: () => state.entity,
+      onSelect: selectEntity,
+    }),
+  );
 
   function set(patch) {
     Object.assign(state, patch, { page: patch.page ?? 1 });

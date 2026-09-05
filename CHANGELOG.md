@@ -4,6 +4,62 @@ All notable changes to CULINA are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-09-05
+
+UX upgrade: a full gesture & motion layer on top of the v1.3.0 brand system,
+plus deployment-critical URL fixes. Nothing removed — every screen, feature,
+provider and state ships unchanged in behavior. Docs: full component catalog,
+wireframes/flows and the upgrade report (`docs/COMPONENT-CATALOG.md`,
+`docs/WIREFRAMES.md`, `docs/UX-UPGRADE-REPORT-v1.4.md`).
+
+### Fixed
+- **Sub-path URL escape (High)** — 9 pages synced filter/tab state with raw
+  `history.replaceState('/path?…')`, which left the deployment base on GitHub
+  Pages project sites (`/culina/`). New base-anchored `replaceUrl()` in
+  `js/router.js`, migrated everywhere (beer, breweries, cocktails, coffee,
+  discover, favorites, ingredients, products, recipes) and locked by a new
+  7-test regression suite (`tests/router-url.test.js`).
+- Favorites toast "View" action did a full-page `location.assign('/favorites')`
+  (base-path unsafe) — now SPA `navigate()`.
+- `APP.version` was stale at 1.1.0 in the drawer/footer — aligned to 1.4.0
+  (package, constant and SW cache version move together from now on).
+- Privacy & Terms "Last updated" refreshed to 5 September 2026.
+
+### Added — gestures (every one an enhancement with a visible accessible twin)
+- **Pull-to-refresh** (touch, scroll-top only, direction-locked, resistance
+  curve, glass pill indicator, haptic tick) — revalidates the current route
+  through the API client's TTL cache (`js/utils/pullToRefresh.js`).
+- **Swipe between tabs** on Discover (6 entities), Ingredients, Favorites (7
+  collections), Home trending, Beer and Coffee (`attachTabSwipe`, never
+  hijacks vertical scroll, ignores row-level swipe items and dialogs).
+- **Long-press / right-click quick actions** on every entity card: Open ·
+  Save/Remove favorite · Add to plan · Copy link (base-anchored absolute URL) ·
+  Share (Web Share API when available) — `js/components/quickActions.js`.
+- **Swipe-left to remove** extended to History searches and Favorites
+  list-view rows (shopping list already had it) with toast feedback.
+- **Image lightbox** — tap hero photos on Home featured + recipe/cocktail/beer/
+  brewery/product/ingredient details (`js/components/lightbox.js`, delegated so
+  async images are covered).
+- **Back-to-top** control (appears past 600 px, safe-area + bottom-nav aware)
+  and a **reading-progress bar** (motion `scroll()`, 2 px, hidden at extremes).
+- **Toast upgrades** — stack capped at 3, swipe-away with finger-follow and
+  spring-back.
+
+### Added — motion (all via the `motion` engine, centralized in `utils/motion.js`)
+- Animated **route transitions**: outgoing view exits (120 ms) in parallel with
+  the incoming chunk load — navigation is never blocked by animation.
+- Animated **dialog/drawer exits** (faster than entrances; Escape intercepted
+  through `cancel` so it animates too, native focus handling preserved).
+- **Press feedback** (`:active` scale) on cards, chips, tiles, tabs, nav —
+  touch-first alternative to hover.
+- New stylesheet `css/gestures.css` (progress bar, PTR, back-to-top, lightbox,
+  action sheet, press feedback) with a full `prefers-reduced-motion`
+  kill-switch; minimal glassmorphism limited to the two floating surfaces.
+
+### Tests
+- 77 unit tests (was 70): +7 router sub-path regressions. Audit, build and the
+  397-assertion gateway suite green.
+
 ## [1.3.0] — 2026-09-04
 
 Brand re-engineering: the identity is **traced from the supplied original

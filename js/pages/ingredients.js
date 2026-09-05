@@ -9,9 +9,11 @@ import { mealdb, fruityvice } from '../api/adapters/index.js';
 import { entityGrid } from '../components/cards.js';
 import { searchField, viewToggle } from '../components/filters.js';
 import { renderTabs } from '../components/tabs.js';
+import { attachTabSwipe } from '../utils/touch.js';
 import { loadMoreButton } from '../components/pagination.js';
 import { skeletonGrid, errorState, emptyState, renderInto } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { replaceUrl } from '../router.js';
 
 const PAGE_SIZE = 36;
 
@@ -56,19 +58,32 @@ export async function render(ctx) {
           { id: 'fruits', label: 'Fruits & nutrition' },
         ],
         active: tab,
-        onSelect: (id) => {
-          tab = id;
-          query = '';
-          shown = PAGE_SIZE;
-          history.replaceState(history.state, '', `/ingredients?tab=${tab}`);
-          applyMeta({ title: 'Ingredients', path: `/ingredients?tab=${tab}` });
-          renderTabsBar();
-          load();
-        },
+        onSelect: (id) => selectTab(id),
         ariaLabel: 'Ingredient sources',
       }),
     );
   }
+
+  /** Switch source tab (tab click or horizontal swipe on results). */
+  function selectTab(id) {
+    if (id === tab) return;
+    tab = id;
+    query = '';
+    shown = PAGE_SIZE;
+    replaceUrl(`/ingredients?tab=${tab}`);
+    applyMeta({ title: 'Ingredients', path: `/ingredients?tab=${tab}` });
+    renderTabsBar();
+    load();
+  }
+
+  /* Swipe the results area left/right to move between the two sources. */
+  ctx.onCleanup(
+    attachTabSwipe(resultsHost, {
+      ids: ['pantry', 'fruits'],
+      getActive: () => tab,
+      onSelect: selectTab,
+    }),
+  );
 
   async function load() {
     renderInto(toolsHost);

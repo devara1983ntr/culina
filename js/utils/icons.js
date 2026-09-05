@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Apple,
   ArrowRight,
+  ArrowUp,
   ArrowUpRight,
   Ban,
   Beef,
@@ -57,6 +58,7 @@ import {
   LayoutGrid,
   Leaf,
   Lightbulb,
+  Link,
   List,
   ListChecks,
   LoaderCircle,
@@ -101,6 +103,7 @@ import {
   Wine,
   X,
   Zap,
+  ZoomIn,
 } from 'lucide';
 
 const set = {
@@ -108,6 +111,7 @@ const set = {
   AlertTriangle,
   Apple,
   ArrowRight,
+  ArrowUp,
   ArrowUpRight,
   Ban,
   Beef,
@@ -155,6 +159,7 @@ const set = {
   LayoutGrid,
   Leaf,
   Lightbulb,
+  Link,
   List,
   ListChecks,
   LoaderCircle,
@@ -199,6 +204,7 @@ const set = {
   Wine,
   X,
   Zap,
+  ZoomIn,
 };
 
 /**

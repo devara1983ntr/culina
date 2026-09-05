@@ -36,7 +36,7 @@ All screenshots are real captures of the running production build (Chromium 1440
 ```bash
 npm install        # install dependencies (vite, motion, lucide, sortablejs, fontsource fonts)
 npm run dev        # dev server with hot reload  (http://localhost:5173)
-npm test           # 70 unit/integration tests (node:test — no extra deps)
+npm test           # 77 unit/integration tests (node:test — no extra deps)
 npm run build      # production build → dist/
 npm start          # production gateway + static server on 0.0.0.0:$PORT (default 3000)
 ```
@@ -48,13 +48,14 @@ The dev server and the production gateway both provide the `/api/fruityvice` rev
 | Area | Highlights |
 | --- | --- |
 | **Unified search** | One query across 7 live providers (recipes, cocktails, fruits, products, breweries, beers, coffee) — `Promise.allSettled` isolation, dedupe, deterministic scoring, per-group ranking |
-| **21 routes** | Home, Discover, Search, Recipes, Recipe detail, Ingredients, Ingredient detail, Nutrition, Products, Product detail, Drinks hub, Cocktails, Cocktail detail, Beer, Breweries, Coffee, Kitchen match, Planner, Favorites, API Health, About (+ offline page) |
+| **34 routes** | Home, Discover, Search, Recipes, Recipe detail, Categories, Cuisines, Ingredients, Ingredient detail, Nutrition, Products, Product detail, Drinks hub, Cocktails, Cocktail detail, Beer, Beer detail, Breweries, Brewery detail, Coffee, Kitchen match, Planner, Shopping list, Favorites, History, Settings, API Health, About, Privacy, Terms, Accessibility, Food gallery (+ offline & 404) |
 | **What can I cook?** (`/kitchen`) | Add what's in your kitchen → recipes ranked by ingredient overlap, with the exact match count stated on every card |
-| **Meal planner** (`/planner`) | 7 days × 3 meals, drag & drop (SortableJS) with button alternatives, duplicate/remove, merged shopping list with unit-aware quantity math |
+| **Meal planner** (`/planner`) | 7 days × 4 meal slots, drag & drop (SortableJS) with button alternatives, duplicate/remove, merged shopping list with unit-aware quantity math |
 | **Favorites** | Per-entity collections, local-first, live badge in the header |
 | **Surprise me** | Weighted random discovery across recipes, cocktails, fruits, breweries and food imagery |
 | **API Health center** (`/health`) | Live status, latency, classification and on-demand diagnostics for all 28 registered providers — passive telemetry only, no background polling |
 | **PWA** | Installable, offline fallback page, service worker (network-first navigations, immutable asset cache, TTL-capped API cache) |
+| **Gestures & motion** (v1.4) | Pull-to-refresh · swipe between tabs · long-press / right-click quick-actions sheet (save, plan, copy link, share) · swipe-to-remove rows · hero-photo lightbox · animated route/dialog/drawer transitions · reading-progress bar · back-to-top · swipe-away toasts — all built on the `motion` engine, compositor-only, with a full `prefers-reduced-motion` contract and a visible accessible twin for every gesture |
 | **Design** | Approved brand identity ([sources](assets/brand/source/culina-logo-board.png)) — Ember Gold / Spicy Orange / Fresh Green / Deep Crimson / Midnight / Cream, Playfair Display + Inter, light/dark themes (persisted), WCAG 2.2 AA targets (contrast-verified tokens), `prefers-reduced-motion` support, mobile-first at 6 breakpoints |
 
 ## Brand identity
@@ -123,7 +124,7 @@ The machine-readable source of truth is [`js/api/registry.js`](js/api/registry.j
 ## Testing & quality gates
 
 ```bash
-npm test            # 70 unit tests (48 core + 22 expansion), 0 failures
+npm test            # 77 unit tests (48 core + 22 expansion + 7 router sub-path), 0 failures
 npm run audit       # static audit: imports, CSS class coverage, icon registry, routes & links
 npm run build       # production build → dist/
 npm run test:ui     # browser E2E (92 checks; needs playwright-core + @sparticuz/chromium, see below)
@@ -193,7 +194,7 @@ Operator checklist for a public deployment:
 
 `.github/workflows/ci.yml` runs on every push/PR:
 
-1. **quality** job — `npm ci` → 70 unit tests → static audit → production build → `npm audit --audit-level=high` → 72 gateway assertions → dist artifact upload.
+1. **quality** job — `npm ci` → 77 unit tests → static audit → production build → `npm audit --audit-level=high` → 397 gateway assertions → dist artifact upload.
 2. **e2e** job (matrix: **Chromium + Firefox**) — rebuild, install browsers via `playwright-core`, boot the production gateway, run the 92-check browser suite, then a post-run smoke test (`/healthz`, shell title, CSP header).
 3. **deploy** job (`.github/workflows/deploy.yml`) — on green pushes to `main`, builds for the GitHub Pages sub-path, rewrites the deployment origin into sitemap/robots/social images, and publishes. A deployment must only happen from a green pipeline; failures in any gate block promotion — nothing is configured to be ignored.
 
@@ -237,7 +238,8 @@ culina/
 ├── scripts/                   # generate-brand-assets.py, rasterize-brand.mjs, verify-contrast.py, set-origin.mjs,
 │                              # browser-qa.mjs + run-qa.mjs (infra-retry wrapper), audit.mjs, gateway-test.mjs
 ├── tests/                     # 5 test files + helpers
-├── docs/                      # API-VERIFICATION, DESIGN-DECISIONS, GAP-REGISTER, RELEASE-CHECKLIST, audits,
+├── docs/                      # COMPONENT-CATALOG, WIREFRAMES, UX-UPGRADE-REPORT-v1.4, API-VERIFICATION,
+│                              # DESIGN-DECISIONS, GAP-REGISTER, RELEASE-CHECKLIST, audits,
 │                              # screenshots/, brand/ (approved board)
 └── design-system/culina/MASTER.md   # generated design system (UI/UX Pro Max skill)
 ```

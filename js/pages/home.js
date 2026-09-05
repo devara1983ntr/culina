@@ -10,6 +10,7 @@ import { entityGrid, entityCard, favoriteButton, mediaImage, itemRoute } from '.
 import { openSurprise } from '../components/surprise.js';
 import { addToPlanDialog } from '../components/plannerWidgets.js';
 import { section, sectionHead, mountReveal } from './shared.js';
+import { attachTabSwipe } from '../utils/touch.js';
 import { providerStrip } from '../components/providerBadge.js';
 import { skeletonGrid, renderInto } from '../components/states.js';
 import { renderTabs } from '../components/tabs.js';
@@ -17,6 +18,7 @@ import { searchField } from '../components/filters.js';
 import { envelopeFor } from '../services/favorites.js';
 import { history } from '../services/history.js';
 import { APP } from '../constants.js';
+import { mountImageLightbox } from '../components/lightbox.js';
 
 function dayIndex() {
   const now = new Date();
@@ -250,15 +252,28 @@ export async function render(ctx) {
           { id: 'beers', label: 'Beers' },
         ],
         active: trendingTab,
-        onSelect: (id) => {
-          trendingTab = id;
-          renderTrendingTabs();
-          loadTrending();
-        },
+        onSelect: (id) => selectTrendingTab(id),
         ariaLabel: 'Trending categories',
       }),
     );
   }
+
+  /** Switch trending tab (click or horizontal swipe on the grid). */
+  function selectTrendingTab(id) {
+    if (id === trendingTab) return;
+    trendingTab = id;
+    renderTrendingTabs();
+    loadTrending();
+  }
+
+  /* Swipe the trending grid left/right to change source. */
+  ctx.onCleanup(
+    attachTabSwipe(trendingGridHost, {
+      ids: ['recipes', 'cocktails', 'beers'],
+      getActive: () => trendingTab,
+      onSelect: selectTrendingTab,
+    }),
+  );
 
   async function loadTrending() {
     renderInto(trendingGridHost, skeletonGrid(4));
@@ -457,6 +472,9 @@ export async function render(ctx) {
   loadTrending();
   refreshIcons();
   mountReveal(ctx, exploreSection.querySelector('.grid-cards'), quickSection, root.querySelector('.home-hero-grid'));
+
+  /* Tap a hero photo to enlarge it (lightbox). */
+  mountImageLightbox(ctx, root);
 
   return root;
 }

@@ -15,6 +15,7 @@ import { mountReveal } from './shared.js';
 import { truncate, ingredientKey } from '../utils/format.js';
 import { revealGrid as mountRevealRef } from '../utils/motion.js';
 import { history } from '../services/history.js';
+import { mountImageLightbox } from '../components/lightbox.js';
 
 
 function asyncSection(sectionEl, loader) {
@@ -264,6 +265,9 @@ export async function render(ctx) {
 
   root.replaceChildren(hero, sections);
   refreshIcons();
+  /* Tap a hero photo to enlarge it (lightbox). */
+  mountImageLightbox(ctx, root);
+
   return root;
 }
 

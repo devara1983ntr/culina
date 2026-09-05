@@ -10,6 +10,7 @@ import { chipRow, searchField, switchField, viewToggle } from '../components/fil
 import { loadMoreButton } from '../components/pagination.js';
 import { skeletonGrid, emptyState, errorState, renderInto } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { replaceUrl } from '../router.js';
 
 const PAGE_SIZE = 24;
 const POPULAR = ['Gin', 'Vodka', 'Rum', 'Tequila', 'Whiskey', 'Bourbon', 'Brandy', 'Champagne', 'Coffee', 'Cream'];
@@ -57,7 +58,7 @@ export async function render(ctx) {
     if (state.ingredient) params.set('ingredient', state.ingredient);
     if (state.nonAlcoholic) params.set('nonAlcoholic', '1');
     const qs = params.toString();
-    history.replaceState(history.state, '', qs ? `/cocktails?${qs}` : '/cocktails');
+    replaceUrl(qs ? `/cocktails?${qs}` : '/cocktails');
   }
 
   async function renderFilters() {

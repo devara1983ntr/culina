@@ -14,6 +14,7 @@ import { skeletonDetail, emptyState, errorState, renderInto } from '../component
 import { envelopeFor } from '../services/favorites.js';
 import { truncate } from '../utils/format.js';
 import { history } from '../services/history.js';
+import { mountImageLightbox } from '../components/lightbox.js';
 
 export async function render(ctx) {
   const { id } = ctx.params;
@@ -159,5 +160,8 @@ export async function render(ctx) {
   );
 
   refreshIcons();
+  /* Tap a hero photo to enlarge it (lightbox). */
+  mountImageLightbox(ctx, root);
+
   return root;
 }

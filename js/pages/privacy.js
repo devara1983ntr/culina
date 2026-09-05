@@ -15,7 +15,7 @@ export async function render(ctx) {
     overline: 'Your data, your device',
     title: 'Privacy',
     lead: 'CULINA is local-first by design. This page explains exactly what is stored, where, and how to remove it.',
-    updated: '3 September 2026',
+    updated: '5 September 2026',
     sections: [
       {
         title: 'What we store, and where',

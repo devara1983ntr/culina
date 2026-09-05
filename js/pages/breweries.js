@@ -11,6 +11,7 @@ import { searchField, selectField, viewToggle } from '../components/filters.js';
 import { pagination } from '../components/pagination.js';
 import { skeletonGrid, emptyState, errorState, renderInto } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { replaceUrl } from '../router.js';
 import { safeUrl } from '../utils/format.js';
 
 const TYPES = ['micro', 'brewpub', 'nano', 'regional', 'large', 'cidery', 'taproom', 'bar', 'contract', 'proprietor', 'planning', 'closed', 'beergarden'];
@@ -75,7 +76,7 @@ export async function render(ctx) {
     if (state.type) params.set('type', state.type);
     if (state.country) params.set('country', state.country);
     if (state.page > 1) params.set('page', String(state.page));
-    history.replaceState(history.state, '', params.toString() ? `/breweries?${params}` : '/breweries');
+    replaceUrl(params.toString() ? `/breweries?${params}` : '/breweries');
   }
 
   async function load() {

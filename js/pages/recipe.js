@@ -18,6 +18,7 @@ import { shoppingList } from '../services/shoppingList.js';
 import { navigate } from '../router.js';
 import { truncate, safeUrl } from '../utils/format.js';
 import { mountReveal } from './shared.js';
+import { mountImageLightbox } from '../components/lightbox.js';
 import { history } from '../services/history.js';
 
 export async function render(ctx) {
@@ -289,5 +290,8 @@ export async function render(ctx) {
 
   root.append(stickyBar);
   refreshIcons();
+  /* Tap a hero photo to enlarge it (lightbox). */
+  mountImageLightbox(ctx, root);
+
   return root;
 }

@@ -5,7 +5,7 @@
 import { el, icon } from '../utils/dom.js';
 import { refreshIcons } from '../utils/icons.js';
 import { applyMeta } from '../seo.js';
-import { navigate } from '../router.js';
+import { navigate, replaceUrl } from '../router.js';
 import { openfoodfacts } from '../api/adapters/index.js';
 import { entityGrid } from '../components/cards.js';
 import { searchField } from '../components/filters.js';
@@ -78,7 +78,7 @@ export async function render(ctx) {
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (page > 1) params.set('page', String(page));
-    history.replaceState(history.state, '', params.toString() ? `/products?${params}` : '/products');
+    replaceUrl(params.toString() ? `/products?${params}` : '/products');
   }
 
   async function load() {

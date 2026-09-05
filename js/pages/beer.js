@@ -11,6 +11,8 @@ import { entityGrid } from '../components/cards.js';
 import { chipRow, selectField } from '../components/filters.js';
 import { skeletonGrid, errorState, emptyState, renderInto, partialFailureNotice } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { attachTabSwipe } from '../utils/touch.js';
+import { replaceUrl } from '../router.js';
 
 export async function render(ctx) {
   let style = ctx.query.style === 'stout' ? 'stout' : 'ale';
@@ -23,6 +25,28 @@ export async function render(ctx) {
   });
 
   const resultsHost = el('div');
+  const styleHost = el('div', { style: { display: 'contents' } });
+
+  function renderStyleChips() {
+    styleHost.replaceChildren(
+      chipRow({
+        items: [{ id: 'ale', label: 'Ales' }, { id: 'stout', label: 'Stouts' }],
+        value: style,
+        onSelect: (id) => selectStyle(id),
+        ariaLabel: 'Beer styles',
+      }),
+    );
+  }
+
+  /** Switch style (chip click or horizontal swipe on the results). */
+  function selectStyle(id) {
+    if (id === style) return;
+    style = id;
+    replaceUrl(`/beer?style=${id}`);
+    renderStyleChips();
+    load();
+  }
+
   const root = el(
     'div',
     { class: 'page' },
@@ -37,16 +61,7 @@ export async function render(ctx) {
       el(
         'div',
         { class: 'filter-bar' },
-        chipRow({
-          items: [{ id: 'ale', label: 'Ales' }, { id: 'stout', label: 'Stouts' }],
-          value: style,
-          onSelect: (id) => {
-            style = id;
-            history.replaceState(history.state, '', `/beer?style=${id}`);
-            load();
-          },
-          ariaLabel: 'Beer styles',
-        }),
+        styleHost,
         selectField({
           id: 'beer-sort',
           label: 'Sort',
@@ -64,6 +79,15 @@ export async function render(ctx) {
       ),
       resultsHost,
     ),
+  );
+
+  /* Swipe the results area left/right to switch between ales and stouts. */
+  ctx.onCleanup(
+    attachTabSwipe(resultsHost, {
+      ids: ['ale', 'stout'],
+      getActive: () => style,
+      onSelect: selectStyle,
+    }),
   );
 
   async function load() {
@@ -122,6 +146,7 @@ export async function render(ctx) {
     }
   }
 
+  renderStyleChips();
   load();
   refreshIcons();
   return root;

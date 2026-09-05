@@ -6,7 +6,9 @@ import { refreshIcons } from './utils/icons.js';
 import { appState } from './state.js';
 import { currentRoute, installLinkInterception, navigate } from './router.js';
 import { applyMeta } from './seo.js';
-import { pageEnter } from './utils/motion.js';
+import { pageEnter, pageExit, mountScrollProgress } from './utils/motion.js';
+import { attachPullToRefresh } from './utils/pullToRefresh.js';
+import { initBackToTop } from './components/backToTop.js';
 import { renderHeader, updateActiveNav } from './components/header.js';
 import { renderBottomNav, updateBottomNav } from './components/bottomNav.js';
 import { settingsService } from './services/settings.js';
@@ -122,7 +124,12 @@ export async function renderRoute({ restoreScroll = null } = {}) {
   }
 
   try {
-    const mod = await loader();
+    /* Page transition (skill: exit faster than enter, never block
+       navigation): the outgoing view fades out WHILE the next route's
+       chunk + render run — the animation costs nothing extra. */
+    const outgoing = firstRender ? null : main.firstElementChild;
+    const exitAnimation = outgoing ? pageExit(outgoing) : Promise.resolve();
+    const [mod] = await Promise.all([loader(), exitAnimation]);
     if (token !== renderToken) return; // a newer navigation superseded us
     const view = await mod.render(ctx);
     if (token !== renderToken) return;
@@ -159,6 +166,11 @@ export async function boot() {
   renderFooter();
   renderBottomNav();
   installLinkInterception();
+  initBackToTop();
+  mountScrollProgress();
+  /* Pull-to-refresh (touch devices): re-mounts the current route, which
+     revalidates every provider call through the API client's TTL cache. */
+  attachPullToRefresh(() => renderRoute());
 
   window.addEventListener('popstate', (event) => {
     renderRoute({ restoreScroll: event.state?.scroll ?? null });

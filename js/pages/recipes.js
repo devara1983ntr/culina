@@ -10,6 +10,7 @@ import { chipRow, selectField, viewToggle, searchField } from '../components/fil
 import { loadMoreButton } from '../components/pagination.js';
 import { skeletonGrid, emptyState, errorState, renderInto } from '../components/states.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { replaceUrl } from '../router.js';
 
 const PAGE_SIZE = 24;
 
@@ -48,7 +49,7 @@ export async function render(ctx) {
     if (state.cuisine) params.set('cuisine', state.cuisine);
     if (state.q) params.set('q', state.q);
     const qs = params.toString();
-    history.replaceState(history.state, '', qs ? `/recipes?${qs}` : '/recipes');
+    replaceUrl(qs ? `/recipes?${qs}` : '/recipes');
   }
 
   async function renderFilters() {

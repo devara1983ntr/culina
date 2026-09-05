@@ -24,6 +24,7 @@ import '../css/layout.css';
 import '../css/components.css';
 import '../css/pages.css';
 import '../css/expansion.css';
+import '../css/gestures.css';
 import '../css/utilities.css';
 import '../css/responsive.css';
 

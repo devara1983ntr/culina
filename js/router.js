@@ -116,3 +116,15 @@ export function installLinkInterception() {
     navigate(href); // navigate() applies the deployment base
   });
 }
+
+/**
+ * Replace the current history entry's URL without triggering a navigation
+ * (query-state sync for filters/tabs). Base-path aware: on a sub-path
+ * deployment (GitHub Pages project site, e.g. /culina/) a bare
+ * history.replaceState('/discover?x') would escape the app root — this
+ * helper always anchors app-internal paths to basePath().
+ */
+export function replaceUrl(path) {
+  const target = path.startsWith('/') ? path : '/' + path;
+  history.replaceState(history.state, '', basePath() + target);
+}

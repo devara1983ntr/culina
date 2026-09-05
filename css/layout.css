@@ -460,19 +460,27 @@
   gap: var(--space-3);
 }
 
-.grid-cards.is-list > .card {
+.grid-cards.is-list > .card,
+.grid-cards.is-list > .swipe-item > .card {
   display: grid;
   grid-template-columns: 108px 1fr;
 }
 
-.grid-cards.is-list > .card .card-media {
+.grid-cards.is-list > .card .card-media,
+.grid-cards.is-list > .swipe-item > .card .card-media {
   aspect-ratio: 1;
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 
-.grid-cards.is-list > .card .card-body {
+.grid-cards.is-list > .card .card-body,
+.grid-cards.is-list > .swipe-item > .card .card-body {
   padding: var(--space-3) var(--space-4);
   align-content: center;
+}
+
+/* Swipe wrapper as a list row: the card inside must fill it. */
+.grid-cards.is-list > .swipe-item {
+  border-radius: var(--radius-card);
 }
 
 /* --- Split layout (detail pages) ---------------------------------------- */

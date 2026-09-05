@@ -5,7 +5,7 @@
  */
 import { el, icon } from '../utils/dom.js';
 import { refreshIcons } from '../utils/icons.js';
-import { dialogEnter, drawerEnter } from '../utils/motion.js';
+import { dialogEnter, drawerEnter, dialogExit, drawerExit } from '../utils/motion.js';
 
 /**
  * @param {{title: string, content: Node, size?: ''|'modal-wide', onClose?: () => void,
@@ -29,12 +29,25 @@ export function openModal({ title, content, size = '', onClose, initialFocus = '
     el('div', { class: 'modal-body' }, content),
   );
 
+  let closing = false;
   function close() {
-    if (dialog.open) dialog.close();
+    if (!dialog.open || closing) return;
+    closing = true;
+    // Exit animation is faster than the entrance (skill: asymmetric timing),
+    // then the native close fires (removal + focus restore below).
+    dialogExit(dialog).then(() => {
+      if (dialog.open) dialog.close();
+    });
   }
 
   closeButton.addEventListener('click', close);
-  // Native <dialog> handles Escape + focus trap. Backdrop click:
+  // Native <dialog> handles Escape + focus trap; intercept the Escape-driven
+  // cancel so it goes through the same animated close.
+  dialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    close();
+  });
+  // Backdrop click:
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) close();
   });
@@ -69,11 +82,20 @@ export function openDrawer({ title, content, onClose }) {
     el('div', { class: 'drawer-body' }, el('div', { class: 'drawer-head' }, el('span', { class: 'overline' }, title), closeButton), content),
   );
 
+  let closing = false;
   function close() {
-    if (dialog.open) dialog.close();
+    if (!dialog.open || closing) return;
+    closing = true;
+    drawerExit(dialog).then(() => {
+      if (dialog.open) dialog.close();
+    });
   }
 
   closeButton.addEventListener('click', close);
+  dialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    close();
+  });
   dialog.addEventListener('close', () => {
     dialog.remove();
     previousFocus?.focus?.();

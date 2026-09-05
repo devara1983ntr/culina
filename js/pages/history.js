@@ -11,6 +11,8 @@ import { settingsService } from '../services/settings.js';
 import { navigate } from '../router.js';
 import { mediaImage } from '../components/cards.js';
 import { pageHeader, mountReveal } from './shared.js';
+import { makeSwipeable } from '../utils/touch.js';
+import { toast } from '../components/toast.js';
 import { emptyState, renderInto } from '../components/states.js';
 import { relativeTime } from '../utils/format.js';
 
@@ -69,7 +71,18 @@ export async function render(ctx) {
     ),
   );
 
+  /* Swipe wrappers are rebuilt on every render — release the previous set. */
+  let swipeCleanups = [];
+  function clearSwipes() {
+    for (const fn of swipeCleanups) {
+      try { fn(); } catch { /* row already detached */ }
+    }
+    swipeCleanups = [];
+  }
+  ctx.onCleanup(clearSwipes);
+
   function renderSearches() {
+    clearSwipes();
     const searches = history.searches();
     if (!searches.length) {
       renderInto(searchesHost, el('p', { class: 'muted', style: { fontSize: 'var(--text-sm)' } }, settingsService.get().historyEnabled ? 'No searches yet — what are you craving?' : 'History recording is off. Enable it in Settings.'));
@@ -78,11 +91,11 @@ export async function render(ctx) {
     renderInto(
       searchesHost,
       el(
-        'ul',
+        'div',
         { class: 'history-list' },
         ...searches.map((entry) =>
           el(
-            'li',
+            'div',
             { class: 'history-row' },
             el('button', { class: 'history-link', type: 'button', onclick: () => navigate(`/search?q=${encodeURIComponent(entry.q)}`) }, icon('search'), el('span', {}, entry.q)),
             el('span', { class: 'muted', style: { fontSize: 'var(--text-xs)' } }, relativeTime(entry.at)),
@@ -91,13 +104,16 @@ export async function render(ctx) {
         ),
       ),
     );
-    // wire remove buttons (kept simple and explicit)
+    // Wire remove buttons (visible, accessible) + swipe-left as the touch
+    // shortcut for the exact same action.
     searchesHost.querySelectorAll('.history-row').forEach((row, index) => {
-      const removeButton = row.querySelector('.icon-btn');
-      removeButton.addEventListener('click', () => {
+      const remove = () => {
         history.removeSearch(searches[index].q);
+        toast(`Removed search “${searches[index].q.slice(0, 40)}”`, { type: 'info' });
         renderSearches();
-      });
+      };
+      row.querySelector('.icon-btn').addEventListener('click', remove);
+      swipeCleanups.push(makeSwipeable(row, remove, { threshold: 88, label: 'Remove' }));
     });
     refreshIcons();
   }

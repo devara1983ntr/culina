@@ -6,7 +6,7 @@
  *   (never cached forever — food data changes).
  * - No credentials are ever cached (none exist).
  */
-const VERSION = '1.3.0';
+const VERSION = '1.4.0';
 const STATIC_CACHE = `culina-static-${VERSION}`;
 const DATA_CACHE = 'culina-data-v1';
 const DATA_TTL = 10 * 60 * 1000;

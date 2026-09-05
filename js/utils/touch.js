@@ -94,3 +94,58 @@ export function makeSwipeable(item, onDismiss, { threshold = 96, label = 'Remove
     }
   };
 }
+
+/**
+ * Horizontal swipe-to-switch-tabs on a content host.
+ * - Direction-locked: vertical scrolling is never hijacked (no
+ *   preventDefault — the browser keeps native scroll behaviour).
+ * - A swipe starting inside a `.swipe-item` (row-level swipe gestures) or a
+ *   dialog is ignored so the two gesture layers never fight.
+ * - Past `threshold` px of horizontal travel with dominant-x movement,
+ *   onSelect receives the previous/next id (clamped at the ends).
+ *
+ * Returns a cleanup function.
+ */
+export function attachTabSwipe(container, { ids, getActive, onSelect, threshold = 70 } = {}) {
+  if (!container) return () => {};
+  if (!('ontouchstart' in window) && !navigator.maxTouchPoints) return () => {};
+  if (!Array.isArray(ids) || ids.length < 2) return () => {};
+
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+
+  const onTouchStart = (event) => {
+    if (event.touches.length !== 1) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest('dialog[open], .swipe-item, .ptr-indicator')) return;
+    tracking = true;
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+  };
+
+  const onTouchEnd = (event) => {
+    if (!tracking) return;
+    tracking = false;
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+    const index = ids.indexOf(getActive());
+    if (index < 0) return;
+    const next = dx < 0 ? index + 1 : index - 1; // swipe left → next tab
+    if (next < 0 || next >= ids.length) return;
+    if (navigator.vibrate) navigator.vibrate(8);
+    onSelect(ids[next]);
+  };
+
+  container.addEventListener('touchstart', onTouchStart, { passive: true });
+  container.addEventListener('touchend', onTouchEnd, { passive: true });
+  container.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+
+  return () => {
+    container.removeEventListener('touchstart', onTouchStart);
+    container.removeEventListener('touchend', onTouchEnd);
+  };
+}
