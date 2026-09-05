@@ -164,11 +164,15 @@ export function attachQuickActions(node, open, { delay = 450, moveTolerance = 10
   };
 
   const onPointerDown = (event) => {
+    /* Every fresh gesture starts clean: a long-press whose sheet was
+       dismissed without a follow-up click (Escape / backdrop) must never
+       leave `fired` armed to swallow an unrelated later tap — including
+       taps on links inside the card, which return early below. */
+    fired = false;
     // Touch/pen only — mouse users get the sheet via right-click, so a slow
     // click-and-hold never surprises them.
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea')) return;
-    fired = false;
     startX = event.clientX;
     startY = event.clientY;
     cancel();
@@ -199,6 +203,10 @@ export function attachQuickActions(node, open, { delay = 450, moveTolerance = 10
   const onContextMenu = (event) => {
     if (event.target instanceof Element && event.target.closest('input, textarea')) return;
     event.preventDefault();
+    /* Touch long-press already opened the sheet (fired === true). Real
+       Android Chrome also emits a native contextmenu for the same gesture —
+       suppress that menu but never open a second sheet. */
+    if (fired) return;
     open();
   };
 

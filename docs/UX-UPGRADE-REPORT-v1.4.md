@@ -1,7 +1,7 @@
 # CULINA v1.4.0 — UI/UX Upgrade Report
 
 **Date:** 5 September 2026 · **Developer credit:** Designed & developed by Roshan
-**Method:** full source audit (92 JS modules / 11 stylesheets / 34 routes) →
+**Method:** full source audit (92 JS modules / 10 stylesheets / 34 routes) →
 UI/UX Pro Max skill checklists (motion, UX guidelines, pre-delivery) →
 surgical implementation → four-gate verification (77 unit tests · static
 audit · production build · 397-assertion gateway suite).
@@ -122,3 +122,52 @@ resolves instantly; CSS kill-switches in `gestures.css`).
 - [x] CI green-path only deploy (tests → audit → build → npm audit → gateway)
 - [x] Docs: COMPONENT-CATALOG · WIREFRAMES · this report · CHANGELOG · README
 - [x] Developer credit: "Designed & developed by Roshan" — footer, About, README
+
+---
+
+## 8. Pre-push certification addendum (5 September 2026)
+
+Full 20-section pre-push certification of the release candidate (`259a7dc`):
+clean `npm ci` from a wiped workspace, reproducible builds, 10-viewport
+responsive matrix, real-browser touch-gesture certification (CDP), a GitHub
+Pages sub-path emulator serving the exact `deploy.yml` artifact
+(`--base=/culina/` + `set-origin` + `404.html` semantics), and the repo E2E
+suite on two engines.
+
+### Defects found by certification — and fixed (F-6 … F-8)
+
+| # | Severity | Defect | Fix |
+|---|----------|--------|-----|
+| F-6 | **High** | `mountScrollProgress` passed a one-argument callback to motion's `scroll()`. Motion dispatches on callback *arity*: one-arg callbacks receive the progress **number**, so `({ y }) => …` destructured `undefined` and threw `Cannot read properties of undefined (reading 'max')` on **every scroll frame** — console error spam in production and a scroll bar that never worked. | Use the two-argument `(progress, info)` form, read `info.y.progress` / `info.y.scrollLength`, and guard the non-scrollable case (scaleX(0), bar hidden). |
+| F-7 | Medium | Real Android fires *both* the 450 ms long-press timer *and* a native `contextmenu` for the same gesture → two stacked action sheets. | `contextmenu` still suppresses the native menu, but no-ops when a long-press already fired. |
+| F-8 | Medium | After long-press → sheet dismissed via Escape/backdrop (no follow-up click), `fired` stayed armed. The next tap on a link *inside a card* early-returned in `pointerdown` (interactive-ancestor guard) without resetting the flag, so click capture swallowed the tap — one silently lost navigation. | Reset `fired` on every `pointerdown` before the guards. Same-gesture suppression is untouched: the synthesized click always arrives before any new `pointerdown`. |
+
+Also synced: `package-lock.json` root version 1.3.0 → 1.4.0 (metadata only;
+`npm ci` was unaffected) and re-measured doc counts (COMPONENT-CATALOG line
+counts, stylesheet count, WIREFRAMES nav breakpoints ≥1024 / <1024 / ≤767).
+
+### Certification battery (all re-run against the fixed tree)
+
+| Gate | Result |
+|------|--------|
+| `npm ci` + `npm test` | 77/77 · 0 vulnerabilities |
+| `npm run audit` | PASS — 92 files · 271 classes · 68 icons · 34 routes↔loaders |
+| Builds (root + `/culina/`) | clean, reproducible hashes · 46 chunks (34 route + shared + index/vendor) · largest page chunk 10.5 kB |
+| Gateway suite | 397/397 |
+| Browser E2E — Chromium | **92/92**, zero unexpected console/page errors |
+| Browser E2E — Firefox 155 | **92/92**. Two benign console artifacts appear *only during deliberate offline injection*: Firefox logs the SW's `Response.error()` fallback ("passed an Error Response to respondWith") and aborted font downloads. The handler is byte-identical to live v1.3.0 and the app resolves to honest offline states (assertions pass). |
+| Pages sub-path emulator | **22/22** — 9 paths direct-load + refresh, SPA nav and back/forward under `/culina/`, query-state sync (F-1 regression), SW scope `/culina/`, cache `culina-static-1.4.0`, base-agnostic manifest, zero page errors |
+| Gesture / lightbox / motion / state / security / perf | **32/32** — tab swipe + dominance rule + keyboard fallback; long-press sheet opens once, scroll cancels, tap still navigates; swipe-to-remove thresholds (30 px keeps, 140 px removes); PTR engages at scroll-top and stays out mid-page; lightbox open/Escape/backdrop/focus + monogram fallback on blocked provider images; reduced-motion content visible, dialogs functional; 3 rapid back-to-back navigations resolve to the final route with a single mounted view; 10 viewports × 6 routes with zero horizontal overflow and exact bottom-nav breakpoint; hard-failure/malformed-JSON/429/partial-outage/empty/offline→recovery states; XSS probe inert; kitchen validation. Endurance: 20 round-trip navigations at 41–51 ms avg, heap Δ 1.1–1.6 MB, 268 steady-state DOM nodes, zero page errors. |
+| Contrast (`scripts/verify-contrast.py`) | ALL PAIRS PASS — WCAG 2.2 AA, light + dark |
+| API regression | `git diff v1.3.0 → js/api js/services` = **0 bytes** (adapters, normalizer, cache, errors, search untouched) |
+| Security headers (gateway) | CSP (strict `script-src` + splash hash), nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, COOP. HSTS is set on HTTPS requests only (RFC 6797: browsers ignore it over plain HTTP); github.io enforces HSTS at the platform level. |
+
+### Documented limitations (pre-existing — not v1.4 regressions)
+
+- Middle-click / modifier-click on internal links intentionally bypasses the
+  SPA interceptor (unmodified left clicks only), so on the Pages sub-path such
+  clicks target the domain root and 404 there. Behaviour unchanged since v1.0;
+  a build-time href rewrite would be the structural fix if ever needed.
+- The `/api/fruityvice` proxy exists only behind the Node gateway; on static
+  Pages hosting that provider degrades gracefully with an honest outage notice
+  (verified by the partial-failure certification above).

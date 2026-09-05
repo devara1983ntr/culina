@@ -56,9 +56,9 @@
 
 | Layer | Viewport | Contents | Sync mechanism |
 | --- | --- | --- | --- |
-| **Header** | ≥769 px | Brand · Discover · Recipes · Ingredients · Drinks ▾ (Cocktails/Beer/Breweries/Coffee) · Planner · Search trigger (⌘K) · Theme cycler · Favorites + live badge · | `updateActiveNav(path)` maps detail routes to their world (`/recipe/*`→Recipes, all drinks→Drinks); `aria-current="page"` |
-| **Drawer** | <769 px (menu button) | Explore (primary, incl. drinks children) + More (11 secondary) + theme + version | Same `data-nav-link` sync |
-| **Bottom nav** | ≤768 px | Home · Discover · Search (opens overlay) · Planner · Saved | `updateBottomNav(path)` with "world" lighting (Discover stays active across all content routes) |
+| **Header** | ≥1024 px | Brand · Discover · Recipes · Ingredients · Drinks ▾ (Cocktails/Beer/Breweries/Coffee) · Planner · Search trigger (⌘K) · Theme cycler · Favorites + live badge · | `updateActiveNav(path)` maps detail routes to their world (`/recipe/*`→Recipes, all drinks→Drinks); `aria-current="page"` |
+| **Drawer** | <1024 px (menu button) | Explore (primary, incl. drinks children) + More (11 secondary) + theme + version | Same `data-nav-link` sync |
+| **Bottom nav** | ≤767 px | Home · Discover · Search (opens overlay) · Planner · Saved | `updateBottomNav(path)` with "world" lighting (Discover stays active across all content routes) |
 | **Command palette** | all (⌘K / Ctrl+K / `/`) | 12 commands + live grouped search + recents + suggestions | Overlay; Enter/arrow/Escape keyboard-complete |
 | **Footer** | all | Explore (6) · Product (5) · live provider attribution · legal · credit line | Static links (intercepted → SPA nav) |
 

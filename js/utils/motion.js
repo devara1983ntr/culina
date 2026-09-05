@@ -136,10 +136,19 @@ export function mountScrollProgress() {
     document.body.append(bar);
   }
 
-  progressStop = scroll(({ y }) => {
-    const progress = y.max > 0 ? y.progress : 0;
-    bar.style.transform = `scaleX(${progress})`;
-    bar.classList.toggle('is-visible', progress > 0.004 && progress < 0.999);
+  /* motion's scroll() dispatches on callback arity: the (progress, info)
+     two-argument form receives the per-axis scroll info object. Guard the
+     non-scrollable case (scrollLength 0 → progress is meaningless). */
+  progressStop = scroll((_progress, info) => {
+    const y = info?.y;
+    if (!y || !(y.scrollLength > 0)) {
+      bar.style.transform = 'scaleX(0)';
+      bar.classList.remove('is-visible');
+      return;
+    }
+    const p = Math.min(1, Math.max(0, y.progress));
+    bar.style.transform = `scaleX(${p})`;
+    bar.classList.toggle('is-visible', p > 0.004 && p < 0.999);
   });
   return () => {
     progressStop?.();
