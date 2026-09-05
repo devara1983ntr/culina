@@ -202,3 +202,80 @@ re-rendered byte-identically, confirming pipeline determinism.
 `sw.js` → v1.2.0; manifest icons incl. maskable 192/512 + brand colors;
 og-image 1200×630 / twitter-card 1200×628; OG/Twitter meta absolute and
 sub-path-correct (`/culina/...`).
+
+---
+
+## Release gate addendum — v1.4.0 gesture & motion upgrade (2026-09-05)
+
+```text
+Version:                v1.4.0
+Certified commit:       236e51c  (certification battery green)
+Released commit:        a99afe4  (236e51c + F-9/F-10 live-verification fixes)
+Previous rejected RC:   259a7dc  (failed certification — F-6/F-7/F-8; never pushed)
+Live previous version:  949a162  (v1.3.0)
+```
+
+**Certification of `259a7dc` found three defects in the new gesture/motion
+layer — the RC was rejected and fixed forward as `236e51c`:**
+
+- **F-6 (High):** `mountScrollProgress` passed a one-argument callback to
+  motion's `scroll()`; motion dispatches on callback arity and hands one-arg
+  callbacks a progress *number*, so `({ y }) => y.max` threw on **every scroll
+  frame** (console spam; progress bar dead). Fixed with the two-argument
+  `(progress, info)` form + non-scrollable guard.
+- **F-7:** real Android fires both the long-press timer and a native
+  `contextmenu` → two stacked quick-action sheets. Second open suppressed.
+- **F-8:** the click-suppression flag stayed armed after a sheet was dismissed
+  without a follow-up click; the next tap on a card link early-returned in
+  `pointerdown` without disarming it → one silently swallowed navigation.
+  `fired` now resets on every `pointerdown`.
+
+**Live release verification of the deployed `236e51c` then caught two sub-path
+escapes invisible to local certification (both runtime-only URL construction),
+fixed in `a99afe4` before sign-off:**
+
+- **F-9:** runtime `og:image`/`twitter:image` fallbacks absolutized against the
+  bare origin → social cards 404ed at the domain root on Pages. Base-prefixed.
+- **F-10:** recipe/cocktail `share()` built absolute URLs without the base →
+  shared links 404ed on Pages. `basePath()`-prefixed (quickActions pattern).
+
+**Gates (all re-run against the fixed trees):** unit 77/77 · static audit PASS
+(92 modules / 271 classes / 34 routes) · gateway 397/397 · reproducible builds
+· Chromium E2E 92/92 (zero unexpected console errors) · Firefox E2E 92/92
+(first local run 90/91: one transient `page.goto` timeout in failure-injection,
+passed clean on immediate re-run — classified infrastructure, recorded not
+hidden) · GitHub Pages sub-path emulator certification 22/22 · gesture /
+lightbox / motion / state / security / performance certification 32/32
+(20 round-trip navigations: 41–51 ms avg, heap Δ 1.1–1.6 MB, zero page errors)
+· WCAG 2.2 AA contrast all pairs · `js/api` + `js/services` diff vs v1.3.0 =
+0 bytes. CI on `a99afe4`: all jobs/steps success on both engines.
+
+**Deployment identity:** Pages deployment record sha `a99afe4`; live
+`sw.js` = 1.4.0; live bundle hashes byte-identical to the certified local
+`dist-pages` artifact.
+
+**Live verification (49/49):** all 16 critical routes (real provider records —
+e.g. recipe 52772 "Teriyaki Chicken Casserole", beer "Founders All Day IPA");
+SPA nav/back/forward/refresh/deep links/query sync never lose `/culina/`;
+mobile drawer + bottom nav (≤767px) and desktop nav exact; branding (traced
+SVG emblem, Playfair wordmark, Roshan/2026 credit, no legacy logo); gesture
+canaries for F-6/F-7/F-8 all clean live; 9 viewports 320→1920 zero overflow;
+PWA: SW scope `/culina/`, cache `culina-static-1.4.0`, **stale `culina-static-
+1.3.0` cache purged by activate cleanup (simulated upgrading user)**, offline
+deep route boots cached shell; SEO: canonical/robots/sitemap absolute, runtime
+OG/Twitter under `/culina/` and both images 200; share() copies the correct
+live URL; honest empty states; zero unexplained console errors.
+
+**Provider conditions observed at release time (external, not app defects):**
+foodish-api.com returning HTTP 503; world.openfoodfacts.org intermittently
+503-ing browser-Origin requests (rate defense). The app degraded honestly in
+both cases (real-data-only contract held; no fabricated content).
+
+**Browser coverage claim:** certified on Chromium (desktop + Android-class
+touch emulation) and Firefox 155. Safari/iOS and real physical devices were
+**not** exercised in this gate.
+
+**v1.4.0 verdict: RELEASED — VERIFIED LIVE** (limitations unchanged: Fruityvice
+proxy is gateway-only and degrades honestly on Pages; Pages deep links return
+HTTP 404 status by mechanism while serving the app; middle-click/modifier-click
+of internal links bypasses the SPA base — unchanged since v1.0).
