@@ -255,6 +255,7 @@ npm start          # zero-dependency gateway: static + SPA fallback + allowliste
 | `npm test` | 77 unit/integration tests (`node:test`, no extra deps) |
 | `npm run audit` | Static consistency audit (imports · CSS classes · icons · routes/links) |
 | `npm run test:ui` | 92-check browser E2E against the running gateway (Chromium default; `CULINA_QA_ENGINE=firefox` for Firefox) |
+| `npm run test:mobile` | 14-check mobile layout regression battery on a 390×844 touch viewport (same engine env vars) |
 
 ## Testing strategy & quality gates
 
@@ -263,6 +264,7 @@ npm test            # 77 unit tests, 0 failures
 npm run audit       # static audit: imports, CSS class coverage, icon registry, routes & links
 npm run build       # production build → dist/
 npm run test:ui     # browser E2E (92 checks; needs playwright-core + @sparticuz/chromium, or CULINA_QA_EXECUTABLE)
+npm run test:mobile # mobile layout regression battery (14 checks, touch viewport)
 node scripts/gateway-test.mjs   # 397 assertions against the production gateway
 ```
 
@@ -288,7 +290,9 @@ npm run test:ui                                # with the gateway running on :30
 
 Notes: route interception patterns must be **RegExp** — playwright-core 1.6x scheme-less globs don't match cross-origin URLs; the suite blocks raster images at the network layer on small runners and recycles pages between sections. Runs on **Chromium and Firefox** (`CULINA_QA_ENGINE=firefox CULINA_QA_EXECUTABLE=<path> npm run test:ui`).
 
-Last verified: **92/92 on Chromium and 92/92 on Firefox in CI for the current release, no unexpected console/page errors.**
+**Mobile layout regression battery** (`npm run test:mobile` → `scripts/mobile-qa.mjs`, standalone fresh-browser suite, also wired into the CI e2e matrix): **14 checks** on an Android-class 390×844 touch viewport — search-icon/text column separation, input isolation from trailing controls, submit containment inside the capsule, microphone layout area + 44×44 target (or honest absence where `SpeechRecognition` is unsupported), `[hidden]` clear-control behavior, focus ring without layout shift, long-query containment, chip height consistency + touch target + wrap containment, body clearance vs the fixed bottom nav (safe-area included), header control targets/spacing, Enter-to-search submission, and a 320/360/375/390/412/430 no-overflow geometry sweep.
+
+Last verified: **92/92 E2E + 14/14 mobile battery on Chromium and Firefox, no unexpected console/page errors.**
 
 ## CI/CD & deployment
 

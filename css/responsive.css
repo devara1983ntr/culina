@@ -17,6 +17,13 @@
   display: inline-flex;
 }
 
+/* Touch devices: chips meet the 44px target without changing pointer UIs. */
+@media (pointer: coarse) {
+  .chip {
+    min-height: var(--control-h);
+  }
+}
+
 .search-trigger {
   min-width: 0;
   width: var(--control-h);

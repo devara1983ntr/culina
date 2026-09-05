@@ -51,7 +51,7 @@ html.js #boot-splash {
 }
 .bottom-nav-btn {
   flex: 1;
-  min-height: 56px;
+  min-height: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -562,14 +562,14 @@ html[data-text-size='large'] {
     z-index: 60;
   }
   body {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--bottom-nav-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
   }
   /* Room for the fixed bottom nav when the recipe action bar is visible */
   .recipe-actionbar {
     position: fixed;
     left: 12px;
     right: 12px;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--bottom-nav-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
     margin: 0;
   }
   .recipe-actionbar-title {
@@ -683,7 +683,7 @@ html[data-text-size='large'] {
     display: none;
   }
   .header-actions {
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
   .brand-word {
     font-size: 1.02rem;

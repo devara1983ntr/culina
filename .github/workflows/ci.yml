@@ -105,6 +105,12 @@ jobs:
           CULINA_QA_EXECUTABLE: ${{ steps.browser.outputs.executable }}
         run: node scripts/run-qa.mjs
 
+      - name: Mobile layout regression battery
+        env:
+          CULINA_QA_ENGINE: ${{ matrix.engine }}
+          CULINA_QA_EXECUTABLE: ${{ steps.browser.outputs.executable }}
+        run: node scripts/mobile-qa.mjs
+
       - name: Post-run smoke test
         run: |
           curl -sf http://localhost:3000/healthz

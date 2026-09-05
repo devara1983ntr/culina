@@ -34,28 +34,28 @@
 .hero-search {
   position: relative;
   max-width: 560px;
-}
-
-.hero-search .input {
   min-height: 56px;
-  padding-right: var(--space-28);
+  padding: var(--space-1);
+  border-color: transparent;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   background: var(--color-surface);
 }
 
-.hero-search .btn {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  bottom: 6px;
-  min-height: calc(100% - 12px);
+.hero-search .input {
+  min-height: 46px;
+}
+
+/* Voice control keeps a full touch target inside the trailing cluster. */
+.hero-search .search-trail .icon-btn {
+  width: var(--control-h);
+  height: var(--control-h);
 }
 
 .hero-quick {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-top: var(--space-5);
 }
 

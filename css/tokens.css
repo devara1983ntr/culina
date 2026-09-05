@@ -125,6 +125,7 @@
   --icon-md: 20px;
   --icon-lg: 24px;
   --control-h: 44px; /* touch target ≥ 44px (skill pre-delivery checklist) */
+  --bottom-nav-h: 66px; /* measured mobile bottom-nav height (btn 64 + border) */
   --control-h-sm: 36px;
 }
 

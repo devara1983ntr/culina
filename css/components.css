@@ -468,20 +468,85 @@ a.card-title:hover {
   color: var(--color-primary-strong);
 }
 
-/* --- Search input ------------------------------------------------------------- */
+/* --- Search input -------------------------------------------------------------
+   The field is a 3-column grid: [lead icon | input | trailing actions].
+   Every control owns its column, so icon/text/button overlap is structurally
+   impossible; the wrap is the visual field (border/background/focus ring) and
+   the inner input is chrome-free. */
 .search-input-wrap {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'icon input trail';
   align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-h);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.search-input-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-ring);
 }
 
 .search-input-wrap > svg.lead-icon {
-  position: absolute;
-  left: var(--space-4);
+  grid-area: icon;
   width: 18px;
   height: 18px;
   color: var(--color-text-muted);
-  pointer-events: none;
+  flex: none;
+}
+
+.search-input-wrap .input {
+  grid-area: input;
+}
+
+.search-trail {
+  grid-area: trail;
+}
+
+/* With a submit action: stacked on small mobile (field row + full-width
+   action row), single-row capsule where the column is wide enough —
+   filter bars from 480px, the hero column (narrower inside the two-column
+   hero grid) from 1200px. */
+.search-input-wrap.has-actions {
+  grid-template-areas:
+    'icon input trail'
+    'submit submit submit';
+}
+
+.search-input-wrap .search-submit {
+  grid-area: submit;
+  width: 100%;
+  min-height: var(--control-h);
+}
+
+@media (min-width: 480px) {
+  .search-input-wrap.has-actions:not(.hero-search) {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'icon input trail submit';
+  }
+
+  .search-input-wrap.has-actions:not(.hero-search) .search-submit {
+    width: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .search-input-wrap.has-actions.hero-search {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'icon input trail submit';
+  }
+
+  .search-input-wrap.has-actions.hero-search .search-submit {
+    width: auto;
+  }
 }
 
 .input {
@@ -509,13 +574,34 @@ a.card-title:hover {
 }
 
 .search-input-wrap .input {
-  padding-left: var(--space-11);
-  padding-right: var(--space-11);
+  width: 100%;
+  min-height: calc(var(--control-h) - 2px);
+  padding: var(--space-2) 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.search-input-wrap .input:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Trailing action cluster (clear / voice) — in-flow, never overlaps. */
+.search-trail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: stretch;
+}
+
+.search-trail > * {
+  flex: none;
 }
 
 .input-clear {
-  position: absolute;
-  right: var(--space-2);
   width: 32px;
   height: 32px;
   display: inline-flex;

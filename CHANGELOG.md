@@ -21,6 +21,22 @@ repository hygiene only — no application behavior changes.
 
 ### Fixed
 
+- Mobile home search capsule reconstructed around a 3-column CSS grid
+  (`[lead icon | input | trailing actions]`): the lead icon now owns its own
+  column (it could previously collapse onto the placeholder because an
+  undefined `--space-11` token voided the input's left padding at computed-value
+  time), the submit button and voice control are in-flow members of a trailing
+  action cluster (the absolutely positioned button previously escaped the
+  capsule and covered the microphone), the `[hidden]` clear control is honored
+  (a missing reset let author `display` rules override the attribute), and the
+  hard-coded `7rem` right-padding hack is gone. Below 480px — and inside the
+  narrow hero column below 1200px — the capsule stacks the submit action onto
+  its own full-width row so the placeholder is never clipped.
+- Mobile spacing/clearance: quick-action chips meet the 44px touch target on
+  coarse pointers with a consistent 12px rhythm; header controls keep an 8px
+  gap on ≤400px viewports; body clearance and the recipe action bar / back-to-top
+  offsets now derive from a `--bottom-nav-h` token plus `env(safe-area-inset-bottom)`
+  instead of a hard-coded 64px that under-measured the real nav height.
 - `docs/BRAND-ASSET-MANIFEST.md`: source-artwork dimensions corrected to the
   measured values (IMG-A 1329×1183, IMG-B 1254×1254), matching
   `docs/brand/BOARD-FORENSICS.md`; manifest marked current for v1.4.0 (brand
@@ -33,6 +49,12 @@ repository hygiene only — no application behavior changes.
   `tests/expansion.test.js`.
 - `.gitignore`: local environment files (`.env`, `.env.local`, `.env.*.local`)
   are now ignored; `.env.example` remains tracked.
+
+### Added
+
+- `scripts/mobile-qa.mjs` + `npm run test:mobile`: standalone 14-check mobile
+  layout regression battery (touch viewport), executed for both engines in the
+  CI e2e matrix alongside the 92-check E2E suite.
 
 ### Removed
 

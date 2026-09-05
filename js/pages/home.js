@@ -95,8 +95,7 @@ export async function render(ctx) {
         micButton.classList.remove('is-listening');
       }
     });
-    heroSearch.element.append(micButton);
-    heroSearch.input.style.paddingRight = '7rem';
+    heroSearch.trail.append(micButton);
   }
 
   const archMedia = el('div', { class: 'arch-media', 'aria-label': 'Food photography' });

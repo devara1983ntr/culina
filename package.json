@@ -12,7 +12,8 @@
     "start": "node server.js",
     "test": "node --test tests/",
     "audit": "node scripts/audit.mjs",
-    "test:ui": "node scripts/run-qa.mjs"
+    "test:ui": "node scripts/run-qa.mjs",
+    "test:mobile": "node scripts/mobile-qa.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.0.0",

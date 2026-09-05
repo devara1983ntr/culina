@@ -91,23 +91,25 @@ export function searchField({ id, placeholder = 'Search…', value = '', onInput
     input.focus();
   });
 
-  const wrap = el('div', { class: 'search-input-wrap' }, icon('search', 'lead-icon'), input, clearBtn);
+  /* Structural layout: CSS grid columns [lead icon | input | trail].
+     The icon owns its column (it can never overlap text), the input owns a
+     minmax(0,1fr) column (it can never push the field wider than its parent),
+     and the trail owns the trailing column for clear/voice/submit actions —
+     every control keeps its own non-overlapping layout area. */
+  const trail = el('div', { class: 'search-trail' }, clearBtn);
+  const children = [icon('search', 'lead-icon'), input, trail];
+  const wrap = el('div', { class: 'search-input-wrap' }, ...children);
   if (onSubmit) {
+    wrap.classList.add('has-actions');
     wrap.append(
       el(
         'button',
-        {
-          class: 'btn btn-primary',
-          type: 'button',
-          style: { position: 'absolute', right: '6px', top: '6px', bottom: '6px', minHeight: 'calc(100% - 12px)' },
-          onclick: () => onSubmit(input.value),
-        },
+        { class: 'btn btn-primary search-submit', type: 'button', onclick: () => onSubmit(input.value) },
         submitLabel,
       ),
     );
-    wrap.querySelector('.input').style.paddingRight = '7rem';
   }
-  return { element: wrap, input };
+  return { element: wrap, input, trail };
 }
 
 /** Boolean filter rendered as a switch. */
