@@ -142,6 +142,18 @@ suite on two engines.
 | F-7 | Medium | Real Android fires *both* the 450 ms long-press timer *and* a native `contextmenu` for the same gesture → two stacked action sheets. | `contextmenu` still suppresses the native menu, but no-ops when a long-press already fired. |
 | F-8 | Medium | After long-press → sheet dismissed via Escape/backdrop (no follow-up click), `fired` stayed armed. The next tap on a link *inside a card* early-returned in `pointerdown` (interactive-ancestor guard) without resetting the flag, so click capture swallowed the tap — one silently lost navigation. | Reset `fired` on every `pointerdown` before the guards. Same-gesture suppression is untouched: the synthesized click always arrives before any new `pointerdown`. |
 
+Post-deployment live verification (release execution, 5 September 2026) found
+two further sub-path escapes of the same class as F-1, fixed before release
+sign-off:
+
+| # | Severity | Defect | Fix |
+|---|----------|--------|-----|
+| F-9 | Medium | Runtime `og:image`/`twitter:image` fallbacks in `js/seo.js` absolutized against the bare origin — on Pages the social cards 404ed at the domain root (static HTML from `set-origin` was correct, but the SPA overwrote it at boot). | Base-prefix the fallback paths (`basePath()`); provider-specified route images untouched; canonical was already base-aware. |
+| F-10 | Medium | `share()` in recipe/cocktail detail built `new URL(route, location.origin)` without the base — shared/copied links 404ed on Pages. | `new URL(basePath() + route, location.origin)` — same pattern quickActions already used. |
+
+Both verified in-browser under the Pages sub-path emulator (runtime meta,
+route canonical, provider image pass-through, share-clipboard) before push.
+
 Also synced: `package-lock.json` root version 1.3.0 → 1.4.0 (metadata only;
 `npm ci` was unaffected) and re-measured doc counts (COMPONENT-CATALOG line
 counts, stylesheet count, WIREFRAMES nav breakpoints ≥1024 / <1024 / ≤767).

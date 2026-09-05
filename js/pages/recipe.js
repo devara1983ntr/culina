@@ -15,7 +15,7 @@ import { skeletonDetail, emptyState, errorState, renderInto } from '../component
 import { envelopeFor } from '../services/favorites.js';
 import { toast } from '../components/toast.js';
 import { shoppingList } from '../services/shoppingList.js';
-import { navigate } from '../router.js';
+import { navigate, basePath } from '../router.js';
 import { truncate, safeUrl } from '../utils/format.js';
 import { mountReveal } from './shared.js';
 import { mountImageLightbox } from '../components/lightbox.js';
@@ -108,7 +108,7 @@ export async function render(ctx) {
   }
 
   async function share() {
-    const url = new URL(route, location.origin).toString();
+    const url = new URL(basePath() + route, location.origin).toString();
     const shareData = { title: recipe.title, text: `A recipe discovered on CULINA`, url };
     if (navigator.share) {
       try {

@@ -12,6 +12,25 @@ provider and state ships unchanged in behavior. Docs: full component catalog,
 wireframes/flows and the upgrade report (`docs/COMPONENT-CATALOG.md`,
 `docs/WIREFRAMES.md`, `docs/UX-UPGRADE-REPORT-v1.4.md`).
 
+### Fixed — pre-push certification & release-verification findings
+- **F-6 (High): scroll-progress exception spam** — `mountScrollProgress` used a
+  one-argument callback for motion's `scroll()`, which dispatches on arity and
+  passes such callbacks a progress *number*; destructuring `{ y }` threw on
+  every scroll frame and the bar never worked. Now the two-argument
+  `(progress, info)` form with a non-scrollable guard.
+- **F-7: double action sheet on Android** — the native `contextmenu` a real
+  Android long-press emits after the 450 ms timer no longer opens a second
+  sheet (native menu still suppressed).
+- **F-8: lost tap after sheet dismissal** — the click-suppression flag stayed
+  armed when a long-press sheet was dismissed without a follow-up click,
+  swallowing the next tap on a card link. Every fresh `pointerdown` disarms it.
+- **F-9: social card URLs under sub-path** — runtime `og:image`/`twitter:image`
+  fallbacks were absolutized against the bare origin, dropping the GitHub
+  Pages base (`/culina/`) and 404ing share previews. Now base-prefixed;
+  provider-specified route images pass through untouched.
+- **F-10: share/copy-link under sub-path** — recipe & cocktail detail `share()`
+  built absolute URLs without the deployment base; now `basePath()`-prefixed.
+
 ### Fixed
 - **Sub-path URL escape (High)** — 9 pages synced filter/tab state with raw
   `history.replaceState('/path?…')`, which left the deployment base on GitHub

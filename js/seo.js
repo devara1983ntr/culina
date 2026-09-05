@@ -81,8 +81,11 @@ export function applyMeta(meta = {}) {
   ogUrl.setAttribute('content', canonicalUrl);
 
   // Open Graph / Twitter card image: route image when available, otherwise
-  // the brand social card. Always absolutized — the OG spec requires it.
-  const ogImage = new URL(meta.ogImage || '/social/og-image.png', window.location.origin).toString();
+  // the brand social card. Always absolutized — the OG spec requires it —
+  // and base-prefixed so sub-path hosting (GitHub Pages project sites)
+  // resolves the brand cards instead of 404ing at the domain root (F-9).
+  const socialBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  const ogImage = new URL(meta.ogImage || `${socialBase}/social/og-image.png`, window.location.origin).toString();
   upsertMeta('meta[property="og:image"]', 'property', 'og:image', ogImage);
   upsertMeta('meta[property="og:image:width"]', 'property', 'og:image:width', meta.ogImage ? undefined : '1200');
   upsertMeta('meta[property="og:image:height"]', 'property', 'og:image:height', meta.ogImage ? undefined : '630');
@@ -90,7 +93,7 @@ export function applyMeta(meta = {}) {
     'meta[name="twitter:image"]',
     'name',
     'twitter:image',
-    new URL(meta.ogImage || '/social/twitter-card.png', window.location.origin).toString(),
+    new URL(meta.ogImage || `${socialBase}/social/twitter-card.png`, window.location.origin).toString(),
   );
   upsertMeta('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image');
 

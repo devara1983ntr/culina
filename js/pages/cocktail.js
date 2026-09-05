@@ -10,6 +10,7 @@ import { favoriteButton, itemRoute, mediaImage, entityGrid } from '../components
 import { sourcePanel } from '../components/providerBadge.js';
 import { skeletonDetail, emptyState, errorState, renderInto } from '../components/states.js';
 import { toast } from '../components/toast.js';
+import { basePath } from '../router.js';
 import { mountReveal } from './shared.js';
 import { mountImageLightbox } from '../components/lightbox.js';
 import { history } from '../services/history.js';
@@ -67,7 +68,7 @@ export async function render(ctx) {
   });
 
   async function share() {
-    const url = new URL(route, location.origin).toString();
+    const url = new URL(basePath() + route, location.origin).toString();
     if (navigator.share) {
       try {
         await navigator.share({ title: drink.title, text: 'A cocktail discovered on CULINA', url });
