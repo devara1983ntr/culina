@@ -1,11 +1,11 @@
-# CULINA — Brand Asset Manifest (v1.3.0)
+# CULINA — Brand Asset Manifest (v1.3.0; unchanged and current in v1.4.0 — the brand was frozen for the v1.4 UX upgrade)
 
 The complete brand asset system, **traced from the supplied original artwork**
 (the absolute source of truth):
 
-- `assets/brand/source/culina-logo-board.png` (IMG-A, 1536×1024) — the brand
+- `assets/brand/source/culina-logo-board.png` (IMG-A, 1329×1183) — the brand
   board: emblem, wordmark, tagline, ornament, logo composition
-- `assets/brand/source/culina-emblem-master.png` (IMG-B, 1024×1024) — the
+- `assets/brand/source/culina-emblem-master.png` (IMG-B, 1254×1254) — the
   emblem master used for the trace (finer detail, isolated)
 
 Every vector asset is genuine traced geometry (Bézier paths); no raster-in-SVG,

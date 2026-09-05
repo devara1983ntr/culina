@@ -1,7 +1,7 @@
 /**
  * CULINA — Input validation (PRD: never trust user input; inline validation
  * everywhere, never rely on browser-native validation alone).
- * Pure functions, unit-tested (tests/validate.test.js).
+ * Pure functions, unit-tested (tests/expansion.test.js).
  */
 
 export const INPUT_LIMITS = {

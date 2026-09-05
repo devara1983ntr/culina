@@ -4,6 +4,43 @@ All notable changes to CULINA are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Post-release production-maintenance pass (2026-09-05). Documentation and
+repository hygiene only — no application behavior changes.
+
+### Changed
+
+- `README.md` rewritten as the comprehensive production document: full 34-route
+  table, provider matrix including all 20 registered-but-not-enabled providers
+  with truthful classifications, storage/PWA/motion/gesture models, npm-script
+  reference, single consolidated deployment section, consolidated
+  known-limitations, real-data policy and repository-hygiene policy. All counts
+  re-verified against the tree (77 unit tests incl. `tests/router-url.test.js`,
+  397 gateway assertions, 92-check E2E on Chromium + Firefox).
+
+### Fixed
+
+- `docs/BRAND-ASSET-MANIFEST.md`: source-artwork dimensions corrected to the
+  measured values (IMG-A 1329×1183, IMG-B 1254×1254), matching
+  `docs/brand/BOARD-FORENSICS.md`; manifest marked current for v1.4.0 (brand
+  frozen, unchanged).
+- Dead references to the retired v1.1.0 brand board (`culina-brand-board.png`)
+  in this file and `docs/GAP-REGISTER.md` now point at its preserved archive
+  copy under `assets/brand/archive/v1.2.0/source/`.
+- `js/utils/validate.js`: header comment referenced a nonexistent
+  `tests/validate.test.js`; the validation unit tests live in
+  `tests/expansion.test.js`.
+- `.gitignore`: local environment files (`.env`, `.env.local`, `.env.*.local`)
+  are now ignored; `.env.example` remains tracked.
+
+### Removed
+
+- `docs/brand/culina-logo-board.png` and `docs/brand/culina-emblem-master.png`
+  — unreferenced byte-identical duplicates of `assets/brand/source/` (the
+  canonical copies referenced by the README, brand manifest, board forensics
+  and the brand pipeline). `docs/brand/BOARD-FORENSICS.md` is retained.
+
 ## [1.4.0] — 2026-09-05
 
 UX upgrade: a full gesture & motion layer on top of the v1.3.0 brand system,

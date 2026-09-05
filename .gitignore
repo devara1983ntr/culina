@@ -4,3 +4,8 @@ dist/
 .DS_Store
 __pycache__/
 dist-pages/
+
+# local environment files (never commit real envs; .env.example is the tracked template)
+.env
+.env.local
+.env.*.local
